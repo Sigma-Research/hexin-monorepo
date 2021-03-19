@@ -1,16 +1,15 @@
 <template>
     <div class="c-helloworld">
-        hello world
+        message: {{ message }}
     </div>
 </template>
 <script>
+import { Vue, Component } from 'vue-property-decorator'
 import './index.css';
 
-export default {
-    name: 'HelloWorld',
-    props: {},
-    computed: {},
-    methods: {},
+@Component
+export default class HelloWorld extends Vue {
+    message = 'hello world';
 }
 </script>
 <style>
