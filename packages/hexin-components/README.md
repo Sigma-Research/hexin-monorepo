@@ -22,3 +22,20 @@ npm run storybook
 # yarn run storybook
 ```
 
+# hexin-components 组件库用法
+
+@yunmingchun：第一次写 Vue 组件库，有什么问题期望可以多提建议，感谢。
+
+## 安装依赖
+```
+yarn add hexin-components
+```
+## 挂载组件库
+```
+const hexin = require('hexin-components');
+hexin.install(Vue);
+```
+## 使用组件
+```
+const { TitleAnalysis } = require('hexin-components').components;
+```
