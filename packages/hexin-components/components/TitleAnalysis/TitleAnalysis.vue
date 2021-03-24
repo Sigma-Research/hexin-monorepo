@@ -1,45 +1,38 @@
 <template>
   <div class="c-title-analysis">
     <div class="c-title-analysis-content">
-      <el-row>
-        <el-row
-          class="c-title-analysis-header"
-          type="flex"
-          justify="space-between"
-          style="margin-bottom: 20px"
-        >
-          <span style="font-size: 14px">标题层级分析</span>
-          <span style="font-size: 14px">最深标题：{{ maxLevel }} 级</span>
-        </el-row>
-        <el-table :data="analysis" :span-method="handleSpanMethod" border>
-          <el-table-column prop="node_level" label="层级" width="80">
-            <template slot-scope="scope">
-              {{ scope.row.node_level }} 级标题
-            </template>
-          </el-table-column>
-          <el-table-column prop="node_level" label="数量" width="80">
-            <template slot-scope="scope">
-              {{ handleNodeFilter(scope.row) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="node_name" label="标题内容">
-            <template slot-scope="scope">
-              <div
-                class="c-title-analysis-title"
-                @click="handleActiveRow(scope.row)"
-              >
-                {{ scope.row.node_name }}
-              </div>
-              <div
-                class="c-title-analysis-title-path"
-                v-show="activeNode === scope.row._id"
-                v-html="handleFindNodePath(scope.row)"
-                :style="{ 'margin-top': '10px' }"
-              />
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-row>
+      <div class="c-title-analysis-header">
+        <span style="font-size: 14px">标题层级分析</span>
+        <span style="font-size: 14px">最深标题：{{ maxLevel }} 级</span>
+      </div>
+      <el-table :data="analysis" :span-method="handleSpanMethod" border>
+        <el-table-column prop="node_level" label="层级" width="80">
+          <template slot-scope="scope">
+            {{ scope.row.node_level }} 级标题
+          </template>
+        </el-table-column>
+        <el-table-column prop="node_level" label="数量" width="80">
+          <template slot-scope="scope">
+            {{ handleNodeFilter(scope.row) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="node_name" label="标题内容">
+          <template slot-scope="scope">
+            <div
+              class="c-title-analysis-title"
+              @click="handleActiveRow(scope.row)"
+            >
+              {{ scope.row.node_name }}
+            </div>
+            <div
+              class="c-title-analysis-title-path"
+              v-show="activeNode === scope.row._id"
+              v-html="handleFindNodePath(scope.row)"
+              :style="{ 'margin-top': '10px' }"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
   </div>
 </template>
@@ -49,13 +42,13 @@ import { deepClone } from '../../common/utils/json'
 import { treeIterate, findNodePath } from '../../common/utils/tree'
 import { uuid } from '../../common/utils/uuid'
 import { TJson, TNode } from '../../common/types/json'
-import mockJson from './mock';
+import mockJson from './mock'
 
 @Component
 export default class TitleAnalysis extends Vue {
   @Prop({ default: mockJson }) public json!: TJson[]
 
-  formattedJson: TJson[] = [];
+  formattedJson: TJson[] = []
 
   // 当前展开的标题路径
   public activeNode: string = ''
@@ -63,18 +56,18 @@ export default class TitleAnalysis extends Vue {
   get catalog() {
     // TODO：这里的深拷贝可以优化掉、仅过滤即可
     return deepClone(this.formattedJson, {
-      filter: node => !!node.node_name && node.node_type === 'chapter',
+      filter: (node) => !!node.node_name && node.node_type === 'chapter',
     })
   }
   get analysis() {
     const plainTitle: TNode[] = []
-    treeIterate(this.catalog, null, item => plainTitle.push(item))
+    treeIterate(this.catalog, null, (item) => plainTitle.push(item))
     plainTitle.sort((a, b) => a.node_name.localeCompare(b.node_name, 'zh'))
     plainTitle.sort((a, b) => a.node_level - b.node_level)
     return plainTitle
   }
   get maxLevel() {
-    return Math.max(...this.analysis.map(i => i.node_level))
+    return Math.max(...this.analysis.map((i) => i.node_level))
   }
 
   mounted() {
@@ -84,11 +77,11 @@ export default class TitleAnalysis extends Vue {
           /**
            * 这里需要注意，在 Json 预处理环节中，数据可能是不持有 _id 的，所以需要生成逻辑 id 使用
            */
-          node._id = uuid();
+          node._id = uuid()
         }
-        return node;
+        return node
       },
-    });
+    })
   }
 
   public handleActiveRow(row: TNode) {
@@ -98,7 +91,9 @@ export default class TitleAnalysis extends Vue {
     if (column.label === '层级') {
       const prev = this.analysis[rowIndex - 1] || {}
       const curr = row
-      const group = this.analysis.filter(i => i.node_level === curr.node_level)
+      const group = this.analysis.filter(
+        (i) => i.node_level === curr.node_level,
+      )
       if (curr.node_level !== prev.node_level) {
         return {
           rowspan: group.length,
@@ -113,7 +108,7 @@ export default class TitleAnalysis extends Vue {
     if (column.label === '数量' || column.label === '标题内容') {
       const prev = this.analysis[rowIndex - 1] || {}
       const curr = row
-      const group = this.analysis.filter(i => i.node_name === curr.node_name)
+      const group = this.analysis.filter((i) => i.node_name === curr.node_name)
       if (curr.node_name !== prev.node_name) {
         return {
           rowspan: group.length,
@@ -132,7 +127,7 @@ export default class TitleAnalysis extends Vue {
   }
   public handleFindNodePath(row: TNode) {
     const nodes = this.analysis.filter(
-      i => i.node_name === row.node_name && i.node_level === row.node_level,
+      (i) => i.node_name === row.node_name && i.node_level === row.node_level,
     )
     if (nodes.length === 1) {
       const path = findNodePath({ children: this.formattedJson }, nodes[0])
@@ -161,7 +156,7 @@ export default class TitleAnalysis extends Vue {
    */
   public handleNodeFilter(node: TNode) {
     return this.analysis.filter(
-      i => i.node_level === node.node_level && i.node_name === node.node_name,
+      (i) => i.node_level === node.node_level && i.node_name === node.node_name,
     ).length
   }
 }
@@ -173,16 +168,12 @@ export default class TitleAnalysis extends Vue {
 
   &-header {
     display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
   }
 
   .el-tabs__item {
     font-size: 12px;
   }
-}
-
-.c-title-analysis-problem1-title {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 </style>

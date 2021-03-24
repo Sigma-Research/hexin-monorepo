@@ -1,6 +1,7 @@
 {
-  "name": "vue-storybook",
-  "version": "0.1.0",
+  "name": "hexin-components",
+  "version": "1.0.0",
+  "main": "index.js",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
