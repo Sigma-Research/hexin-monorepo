@@ -1,6 +1,8 @@
 import TitleAnalysis from './components/TitleAnalysis/TitleAnalysis.vue'
 
-const components = [TitleAnalysis]
+const components = {
+  TitleAnalysis,
+}
 /**
  *
  * @param {Vue} Vue
@@ -9,7 +11,11 @@ const install = Vue => {
   if (install.installed) {
     return
   }
-  components.map(component => Vue.component(component.name, component))
+  Object.keys(components).map(key => {
+    const component = components[key]
+    Vue.component(component.name, component)
+  })
+  install.installed = true
 }
 export default {
   install,
