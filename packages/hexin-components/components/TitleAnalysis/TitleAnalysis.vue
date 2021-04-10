@@ -48,8 +48,6 @@ import mockJson from './mock'
 export default class TitleAnalysis extends Vue {
   @Prop({ default: mockJson }) public json!: TJson[]
 
-  formattedJson: TJson[] = []
-
   // 当前展开的标题路径
   public activeNode: string = ''
 
@@ -66,12 +64,9 @@ export default class TitleAnalysis extends Vue {
     plainTitle.sort((a, b) => a.node_level - b.node_level)
     return plainTitle
   }
-  get maxLevel() {
-    return Math.max(...this.analysis.map((i) => i.node_level))
-  }
 
-  mounted() {
-    this.formattedJson = deepClone(this.json, {
+  get formattedJson () {
+    return deepClone(this.json, {
       callback: (node: TNode) => {
         if (node && node.node_type) {
           /**
@@ -82,6 +77,10 @@ export default class TitleAnalysis extends Vue {
         return node
       },
     })
+  }
+  
+  get maxLevel() {
+    return Math.max(...this.analysis.map((i) => i.node_level))
   }
 
   public handleActiveRow(row: TNode) {
