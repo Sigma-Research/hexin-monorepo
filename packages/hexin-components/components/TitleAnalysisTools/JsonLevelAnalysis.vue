@@ -128,15 +128,14 @@ export default {
       }
       const list = this.getLevelAnalysis(res);
       this.maxContentLevel = 0
-      list.forEach(item => {
+      this.maxNodeLevel = 0
+      return list.map(item => {
         if (item.content.level * 1 > this.maxContentLevel) {
           this.maxContentLevel = item.content.level * 1;
         }
         if (item.node_level * 1 > this.maxNodeLevel) {
           this.maxNodeLevel = item.node_level * 1;
         }
-      });
-      return list.map(item => {
         item.children = item.children.sort((a, b) => {
           if (amountSort === "down") {
             return b.count - a.count;
