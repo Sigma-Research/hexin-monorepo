@@ -6,7 +6,7 @@
       </div>
       <div class="m-b-15">
         <div class="flex">
-          <el-radio-group v-model="changeLevelType" style="margin-right: 20px;" class="flex-1">
+          <el-radio-group v-model="changeLevelType" style="margin-right: 20px;" class="flex-1" @change="()=>{}">
             <el-radio-button :label="true">内容层级</el-radio-button>
             <el-radio-button :label="false">物理层级</el-radio-button>
           </el-radio-group>
@@ -35,7 +35,7 @@
             </span>
           </div>
         </div>
-        <div class="analysis-tbody flex-1">
+        <div class="analysis-tbody flex-1" :key="jsonAnalysisUpdate">
           <div v-for="(item, index) in jsonAnalysis" :key="index" class="analysis-item flex">
             <span
               v-if="changeLevelType"
@@ -71,16 +71,19 @@
 
 <script>
 import _groupBy from "lodash/groupBy";
+import mockJson from './mock'
+import './style.scss'
 
 export default {
   name: "JsonLevelAnalysis",
   props: {
-    list: {
+    Json: {
       type: Array,
-      required: true
+      default: mockJson
     },
     hide: {
-      type: Boolean
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -90,23 +93,50 @@ export default {
       contentSort: "",
       changeLevelType: true,
       maxNodeLevel: 0,
-      maxContentLevel: 0
+      maxContentLevel: 0,
+      jsonAnalysis: [],
+      jsonAnalysisUpdate: 0
     };
   },
-  mounted() {
-    this.jsonAnalysis.forEach(item => {
-      if (item.content.level * 1 > this.maxContentLevel) {
-        this.maxContentLevel = item.content.level * 1;
-      }
-      if (item.node_level * 1 > this.maxNodeLevel) {
-        this.maxNodeLevel = item.node_level * 1;
-      }
-    });
+  async created() {
+    await this.settingData(this.Json)
+    this.jsonAnalysis = this.getJsonAnalysis()
   },
-  computed: {
-    jsonAnalysis() {
+  watch: {
+    'Json': {
+      handler () {
+        this.jsonAnalysis = this.getJsonAnalysis()
+        this.jsonAnalysisUpdate ++
+      },
+      deep: true
+    },
+    'changeLevelType': {
+      handler () {
+        this.jsonAnalysis = this.getJsonAnalysis()
+        this.jsonAnalysisUpdate ++
+      },
+    }
+  },
+  methods: {
+    getJsonAnalysis() {
       const { amountSort, contentSort } = this;
-      const list = this.getLevelAnalysis(this.list);
+      let res = this.getNodeNamePath(this.Json);
+      if(this.changeLevelType){
+        res = _groupBy(res, function (n) { return n.content.level; });
+      } else {
+        res = _groupBy(res, "node_level");
+      }
+      console.log(res);
+      const list = this.getLevelAnalysis(res);
+      this.maxContentLevel = 0
+      list.forEach(item => {
+        if (item.content.level * 1 > this.maxContentLevel) {
+          this.maxContentLevel = item.content.level * 1;
+        }
+        if (item.node_level * 1 > this.maxNodeLevel) {
+          this.maxNodeLevel = item.node_level * 1;
+        }
+      });
       return list.map(item => {
         item.children = item.children.sort((a, b) => {
           if (amountSort === "down") {
@@ -127,12 +157,18 @@ export default {
         });
         return item;
       });
-    }
-  },
-  methods: {
-    getLevelAnalysis(data) {
-      let res = this.getNodeNamePath(data);
-      res = _groupBy(res, "node_level");
+    },
+    settingData(data) {
+      data.forEach(item=> {
+        item._children = item.children;
+        item._check = true;
+        item.topName = "";
+        if (item.children.length) {
+          this.settingData(item.children);
+        }
+      })
+    },
+    getLevelAnalysis(res) {
       let id = 1;
       let analysisResult = [];
       let namesMap = {};
