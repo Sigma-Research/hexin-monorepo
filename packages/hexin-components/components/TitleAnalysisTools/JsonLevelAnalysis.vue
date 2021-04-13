@@ -126,7 +126,6 @@ export default {
       } else {
         res = _groupBy(res, "node_level");
       }
-      console.log(res);
       const list = this.getLevelAnalysis(res);
       this.maxContentLevel = 0
       list.forEach(item => {
