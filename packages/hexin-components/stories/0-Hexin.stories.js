@@ -1,15 +1,16 @@
-import TitleAnalysis from '../components/TitleAnalysis/TitleAnalysis.vue';
+import JsonLevelAnalysis from '../components/TitleAnalysisTools/JsonLevelAnalysis.vue';
 import '../plugins/element';
 
 export default {
   title: 'hexin',
 }
 
-export const ChapterAnalysis = () => ({
-  components: { TitleAnalysis },
-  template: '<TitleAnalysis />',
+export const ChapterAnalysisHandle = () => ({
+  components: { JsonLevelAnalysis },
+  template: '<JsonLevelAnalysis />',
 })
 
-ChapterAnalysis.story = {
+ChapterAnalysisHandle.story = {
   name: '标题分析组件',
 }
+

@@ -1,7 +1,9 @@
 import TitleAnalysis from './components/TitleAnalysis/TitleAnalysis.vue'
+import JsonLevelAnalysis from './components/TitleAnalysisTools/JsonLevelAnalysis.vue'
 
 const components = {
   TitleAnalysis,
+  JsonLevelAnalysis
 }
 /**
  *
