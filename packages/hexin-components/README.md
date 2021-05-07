@@ -36,6 +36,24 @@ const hexin = require('hexin-components');
 hexin.install(Vue);
 ```
 ## 使用组件
+
+### 标题分析组件: 
+
+## 组件使用
 ```
-const { TitleAnalysis } = require('hexin-components').components;
+<!-- 标题分析组件 -->
+const { JsonLevelAnalysis } = require('hexin-components').components;
+
+<template>
+  <!-- Json属性: 需要分析的Json树状结构 -->
+  <JsonLevelAnalysis :Json="Json" />
+</template>
 ```
+## 组件props
+Json  ----------  渲染标题分析表格的所有Json数据
+hide  ----------  是否渲染标题分析的头部文字
+selectItem  ----------  如果有选择需求，把树结构打平成列表，把选中的item放在数组中，树结构和列表需要有唯一标识
+
+
+
+
