@@ -90,6 +90,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    selectItem: {
+      type: Array,
+      default: () => null
+    }
   },
   data() {
     return {
@@ -103,12 +107,18 @@ export default {
       jsonAnalysisUpdate: 0,
     }
   },
-  async created() {
-    await this.settingData(this.Json)
+  created() {
     this.jsonAnalysis = this.getJsonAnalysis()
   },
   watch: {
     Json: {
+      handler() {
+        this.jsonAnalysis = this.getJsonAnalysis()
+        this.jsonAnalysisUpdate++
+      },
+      deep: true,
+    },
+    selectItem: {
       handler() {
         this.jsonAnalysis = this.getJsonAnalysis()
         this.jsonAnalysisUpdate++
@@ -163,16 +173,6 @@ export default {
         return item
       })
     },
-    settingData(data) {
-      data.forEach(item => {
-        item._children = item.children
-        item._check = true
-        item.topName = ''
-        if (item.children.length) {
-          this.settingData(item.children)
-        }
-      })
-    },
     getLevelAnalysis(res) {
       let id = 1
       let analysisResult = []
@@ -210,23 +210,40 @@ export default {
     },
     getNodeNamePath(data) {
       let res = []
+      const select = this.selectItem
       function trackBack(data, nameStr) {
         for (let item of data) {
           const path = `${
-            nameStr ? `${nameStr}<span class="text-danger">-</span>` : ''
+            nameStr ? `${nameStr}<span class="text-danger" style="color: red">-</span>` : ''
           }${item.node_name || ''}`
           if (item.node_type === 'chapter') {
-            res.push({
-              node_level: item.node_level,
-              node_name: item.node_name,
-              path,
-              content: {
-                level: item.content.level,
-              },
-            })
-          }
-          if (item._children && item._children.length) {
-            trackBack(item.children, path)
+            if (select === null) {
+              res.push({
+                node_level: item.node_level,
+                node_name: item.node_name,
+                path,
+                content: {
+                  level: item.content.level ? item.content.level : '--',
+                },
+              })
+            } else {
+              select.forEach(selectitem => {
+                if (selectitem._id === item._id) {
+                  res.push({
+                    node_level: item.node_level,
+                    node_name: item.node_name,
+                    path,
+                    content: {
+                      level: item.content.level ? item.content.level : '--',
+                    },
+                  })
+                  break;
+                }
+              })
+            }
+            if (item.children.length) {
+              trackBack(item.children, path)
+            }
           }
         }
       }
