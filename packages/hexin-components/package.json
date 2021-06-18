@@ -1,6 +1,6 @@
 {
   "name": "hexin-components",
-  "version": "1.0.4-alpha4",
+  "version": "1.0.7",
   "main": "index.js",
   "scripts": {
     "serve": "vue-cli-service serve",

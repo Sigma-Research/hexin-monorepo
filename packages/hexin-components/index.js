@@ -1,9 +1,7 @@
 import JsonLevelAnalysis from './components/TitleAnalysisTools/JsonLevelAnalysis.vue'
-// import CatalogTree from './components/catalog/CatalogTree.vue'
 
 const components = {
   JsonLevelAnalysis,
-  // CatalogTree
 }
 /**
  *

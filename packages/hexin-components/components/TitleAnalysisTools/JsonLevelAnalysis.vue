@@ -61,9 +61,9 @@
               </div>
               <div v-if="currAnalysisId === info.id" class="analysis-location">
                 <div class="m-b-10">定位</div>
-                <div v-for="(sub, index) in info.children" :key="sub.id" class="m-b-5">
+                <div v-for="(sub, index) in info.children" :key="sub.id" class="m-b-5" @click="emitHandle(sub.path.data)" style="cursor: pointer">
                   <span class="m-r-5">{{ index + 1 }}.</span>
-                  <span v-html="sub.path"></span>
+                  <span v-html="sub.path.str"></span>
                 </div>
               </div>
             </div>
@@ -221,7 +221,10 @@ export default {
               res.push({
                 node_level: item.node_level,
                 node_name: item.node_name,
-                path,
+                path: {
+                  str: path,
+                  data: item
+                },
                 content: {
                   level: item.content.level ? item.content.level : '--',
                 },
@@ -232,12 +235,14 @@ export default {
                   res.push({
                     node_level: item.node_level,
                     node_name: item.node_name,
-                    path,
+                    path: {
+                      str: path,
+                      data: item
+                    },
                     content: {
                       level: item.content.level ? item.content.level : '--',
                     },
                   })
-                  break;
                 }
               })
             }
@@ -265,6 +270,9 @@ export default {
         this.contentSort = this.contentSort === 'up' ? 'down' : 'up'
         this.amountSort = ''
       }
+    },
+    emitHandle(data) {
+      this.$emit('clickItem', data)
     },
   },
 }
