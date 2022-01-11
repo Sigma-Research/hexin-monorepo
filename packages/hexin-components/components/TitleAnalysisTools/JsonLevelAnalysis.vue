@@ -40,7 +40,7 @@
           </span>
         </div>
       </div>
-      <div class="analysis-tbody flex-1" :key="jsonAnalysisUpdate">
+      <div class="analysis-tbody flex-1">
         <div v-for="(item, index) in jsonAnalysis" :key="index" class="analysis-item flex">
           <span
             v-if="changeLevelType"
@@ -51,7 +51,7 @@
             <div v-for="info in item.children" :key="info.id" class="flex-1 item">
               <div class="flex j-between a-center p-a-10 c-p" @click="showAnalysisContent(info)">
                 <div class="count">{{ info.count }}</div>
-                <div class="flex-1">{{ info.name }}</div>
+                <div class="flex-1" v-html="info.name"></div>
                 <i
                   :class="{
                     'el-icon-arrow-right': currAnalysisId !== info.id,
@@ -61,9 +61,9 @@
               </div>
               <div v-if="currAnalysisId === info.id" class="analysis-location">
                 <div class="m-b-10">定位</div>
-                <div v-for="(sub, index) in info.children" :key="sub.id" class="m-b-5">
+                <div v-for="(sub, index) in info.children" :key="sub.id" class="m-b-5" @click="emitHandle(sub.path.data)" style="cursor: pointer">
                   <span class="m-r-5">{{ index + 1 }}.</span>
-                  <span v-html="sub.path"></span>
+                  <span v-html="sub.path.str"></span>
                 </div>
               </div>
             </div>
@@ -77,6 +77,7 @@
 <script>
 import _groupBy from 'lodash/groupBy'
 import mockJson from './mock'
+import katex from 'katex'
 import './style.scss'
 
 export default {
@@ -90,6 +91,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    selectItem: {
+      type: Array,
+      default: () => null
+    }
   },
   data() {
     return {
@@ -100,25 +105,27 @@ export default {
       maxNodeLevel: 0,
       maxContentLevel: 0,
       jsonAnalysis: [],
-      jsonAnalysisUpdate: 0,
     }
   },
-  async created() {
-    await this.settingData(this.Json)
+  created() {
     this.jsonAnalysis = this.getJsonAnalysis()
   },
   watch: {
     Json: {
       handler() {
         this.jsonAnalysis = this.getJsonAnalysis()
-        this.jsonAnalysisUpdate++
+      },
+      deep: true,
+    },
+    selectItem: {
+      handler() {
+        this.jsonAnalysis = this.getJsonAnalysis()
       },
       deep: true,
     },
     changeLevelType: {
       handler() {
         this.jsonAnalysis = this.getJsonAnalysis()
-        this.jsonAnalysisUpdate++
       },
     },
   },
@@ -163,16 +170,6 @@ export default {
         return item
       })
     },
-    settingData(data) {
-      data.forEach(item => {
-        item._children = item.children
-        item._check = true
-        item.topName = ''
-        if (item.children.length) {
-          this.settingData(item.children)
-        }
-      })
-    },
     getLevelAnalysis(res) {
       let id = 1
       let analysisResult = []
@@ -210,23 +207,45 @@ export default {
     },
     getNodeNamePath(data) {
       let res = []
-      function trackBack(data, nameStr) {
+      const select = this.selectItem
+      const trackBack = (data, nameStr) => {
         for (let item of data) {
           const path = `${
-            nameStr ? `${nameStr}<span class="text-danger">-</span>` : ''
-          }${item.node_name || ''}`
+            nameStr ? `${nameStr}<span class="text-danger" style="color: red; margin: 0px 5px">-</span>` : ''
+          }${this.renderHtmlLatex(item.node_name) || ''}`
           if (item.node_type === 'chapter') {
-            res.push({
-              node_level: item.node_level,
-              node_name: item.node_name,
-              path,
-              content: {
-                level: item.content.level,
-              },
-            })
-          }
-          if (item._children && item._children.length) {
-            trackBack(item.children, path)
+            if (select === null) {
+              res.push({
+                node_level: item.node_level,
+                node_name: this.renderHtmlLatex(item.node_name),
+                path: {
+                  str: path,
+                  data: item
+                },
+                content: {
+                  level: item.content.level ? item.content.level : '--',
+                },
+              })
+            } else {
+              select.forEach(selectitem => {
+                if (selectitem._id === item._id) {
+                  res.push({
+                    node_level: item.node_level,
+                    node_name: this.renderHtmlLatex(item.node_name),
+                    path: {
+                      str: path,
+                      data: item
+                    },
+                    content: {
+                      level: item.content.level ? item.content.level : '--',
+                    },
+                  })
+                }
+              })
+            }
+            if (item.children.length) {
+              trackBack(item.children, path)
+            }
           }
         }
       }
@@ -249,6 +268,36 @@ export default {
         this.amountSort = ''
       }
     },
+    emitHandle(data) {
+      this.$emit('clickItem', data)
+    },
+    renderHtmlLatex (html, opt = {}) {
+      if (html) {
+        const newHtml = html.replace(/\$\$([\s\S]*?)\$\$/g, (_m, latex) => {
+          if (latex) {
+            const mathHtml = this.renderLatex(latex, opt);
+            return `<span data-label="latex" data-value="${latex.replace(/"/g, '&quot;')}">${mathHtml}</span>`;
+          }
+          return _m;
+        });
+        return newHtml;
+      }
+      return html;
+    },
+    renderLatex (latex, {
+      output = 'html',
+      displayMode = true,
+      strict = false,
+      throwOnError = false,
+    } = {}) {
+      const result = katex.renderToString(latex, {
+        output,
+        displayMode,
+        strict,
+        throwOnError,
+      });
+      return result;
+    }
   },
 }
 </script>
