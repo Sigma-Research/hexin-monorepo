@@ -51,7 +51,7 @@
             <div v-for="info in item.children" :key="info.id" class="flex-1 item">
               <div class="flex j-between a-center p-a-10 c-p" @click="showAnalysisContent(info)">
                 <div class="count">{{ info.count }}</div>
-                <div class="flex-1" v-html="info.name"></div>
+                <div class="flex-1 flex" v-html="info.name"></div>
                 <i
                   :class="{
                     'el-icon-arrow-right': currAnalysisId !== info.id,
@@ -63,7 +63,7 @@
                 <div class="m-b-10">定位</div>
                 <div v-for="(sub, index) in info.children" :key="sub.id" class="m-b-5" @click="emitHandle(sub.path.data)" style="cursor: pointer">
                   <span class="m-r-5">{{ index + 1 }}.</span>
-                  <span v-html="sub.path.str"></span>
+                  <span class="flex" v-html="sub.path.str"></span>
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export default {
         const newHtml = html.replace(/\$\$([\s\S]*?)\$\$/g, (_m, latex) => {
           if (latex) {
             const mathHtml = this.renderLatex(latex, opt);
-            return `<span data-label="latex" data-value="${latex.replace(/"/g, '&quot;')}">${mathHtml}</span>`;
+            return mathHtml;
           }
           return _m;
         });
@@ -286,7 +286,7 @@ export default {
     },
     renderLatex (latex, {
       output = 'html',
-      displayMode = true,
+      displayMode = false,
       strict = false,
       throwOnError = false,
     } = {}) {
