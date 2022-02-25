@@ -24,8 +24,6 @@ npm run storybook
 
 # hexin-components 组件库用法
 
-@yunmingchun：第一次写 Vue 组件库，有什么问题期望可以多提建议，感谢。
-
 ## 安装依赖
 ```
 yarn add hexin-components
