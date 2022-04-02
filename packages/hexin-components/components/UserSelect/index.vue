@@ -1,6 +1,12 @@
 <template>
   <div>
-    <el-select @change="selectChange" filterable clearable v-model="value" placeholder="请选择">
+    <el-select
+      @change="selectChange"
+      filterable
+      clearable
+      v-model="value"
+      placeholder="请选择"
+    >
       <el-option
         v-for="item in users"
         :key="item.userId"
@@ -34,12 +40,13 @@ export default class UserSelect extends Vue {
   public data!: IUserType[]
 
   async mounted() {
-    await this.init();
+    await this.init()
   }
-  
-  private users: IUserType[] = [];
+
+  private users: IUserType[] = []
+
   init() {
-   this.users = this.data.map((item: IUserType) => {
+    this.users = this.data.map((item: IUserType) => {
       item.roleDescribe = ''
       if (item.role) {
         item.roleDescribe += item.role
@@ -49,7 +56,7 @@ export default class UserSelect extends Vue {
           .join('、')
         item.userDescribe = item.nickname + '：' + item.roleDescribe
       }
-      return item;
+      return item
     })
   }
 
