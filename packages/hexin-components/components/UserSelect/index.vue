@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="c-user-select">
     <el-select
       @change="selectChange"
       filterable
@@ -10,21 +10,26 @@
       <el-option
         v-for="item in users"
         :key="item.userId"
-        :label="item.userDescribe"
+        :label="item.userDescription"
         :value="item.userId"
       >
         <el-tooltip
           class="item"
           effect="light"
-          :content="item.userDescribe"
+          :content="item.userDescription"
+          v-show="item.roleDescription.length > 11"
           placement="right-start"
         >
-          <div style="display: flex; justify-content: space-between">
+          <div class="c-box-content">
             <span style="width: 30%">{{ item.nickname }}</span>
-
-            <span class="rightBox">{{ item.roleDescribe }}</span>
+            <span class="right-box">{{ item.roleDescription }}</span>
           </div>
         </el-tooltip>
+
+        <div class="c-box-content" v-show="item.roleDescription.length <= 11">
+          <span style="width: 30%">{{ item.nickname }}</span>
+          <span class="right-box">{{ item.roleDescription }}</span>
+        </div>
       </el-option>
     </el-select>
   </div>
@@ -47,14 +52,14 @@ export default class UserSelect extends Vue {
 
   init() {
     this.users = this.data.map((item: IUserType) => {
-      item.roleDescribe = ''
+      item.roleDescription = ''
       if (item.role) {
-        item.roleDescribe += item.role
+        item.roleDescription += item.role
           .map((item: IRole) => {
             return item.name
           })
           .join('、')
-        item.userDescribe = item.nickname + '：' + item.roleDescribe
+        item.userDescription = item.nickname + '：' + item.roleDescription
       }
       return item
     })
@@ -67,14 +72,19 @@ export default class UserSelect extends Vue {
   }
 }
 </script>
-<style lang="scss">
-.rightBox {
-  color: #4a8de9;
-  font-size: 13px;
-  width: 70%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+<style scoped lang="scss">
+.c-box-content {
+  display: flex; 
+  justify-content: space-between;
+
+  .right-box {
+    color: #4a8de9;
+    font-size: 13px;
+    width: 70%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 
 .el-input__inner {

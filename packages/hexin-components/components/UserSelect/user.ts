@@ -12,7 +12,7 @@ export interface IUserType {
   male: number,
   headImageUrl: string,
   business: number,
-  roleDescribe?: string,
-  userDescribe?: string,
+  roleDescription?: string,
+  userDescription?: string,
   role: Array<IRole>
 }
