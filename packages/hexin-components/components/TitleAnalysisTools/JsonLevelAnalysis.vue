@@ -76,7 +76,6 @@
 
 <script>
 import _groupBy from 'lodash/groupBy'
-import mockJson from './mock'
 import katex from 'katex'
 import './style.scss'
 
@@ -85,7 +84,7 @@ export default {
   props: {
     Json: {
       type: Array,
-      default: mockJson,
+      default: () => [],
     },
     hide: {
       type: Boolean,
