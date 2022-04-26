@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%">
     <RecycleScroller
       class="scroller"
       :items="list"
@@ -77,6 +77,7 @@
                     <el-checkbox
                       v-if="showCheckbox && item.node_type !== 'chapter' && item._parent.node_type === 'chapter'"
                       v-model="item.checked"
+                      @click.stop
                       @change="checkChange"
                       :disabled="!(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
                     />
