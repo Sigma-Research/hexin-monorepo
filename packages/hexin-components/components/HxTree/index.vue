@@ -716,6 +716,7 @@ export default {
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
           this.$set(orgNode, 'parent_id', targetParent.node_id);
+          this.$set(orgNode, 'node_level', targetParent.node_level + 1);
           this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
           this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex - 1, 0, orgNode);
           this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
@@ -746,6 +747,7 @@ export default {
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
             this.$set(orgNode, 'parent_id', target.node_id);
+            this.$set(orgNode, 'node_level', target.node_level + 1);
             this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
             this.riginalDataMap.get(target.node_id).children.unshift(orgNode);
             this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
@@ -775,6 +777,7 @@ export default {
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
             this.$set(orgNode, 'parent_id', targetParent.node_id);
+            this.$set(orgNode, 'node_level', targetParent.node_level + 1);
             this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
             this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex + 1, 0, orgNode);
             this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
