@@ -57,8 +57,8 @@
           ]"
         >
           <div class="item-padding" :style="paddingLeft(item)">
-            <div class="item-inner flex-center" @click="closeChapter(item)">
-              <div class="icon-box flex-center">
+            <div class="item-inner flex-center">
+              <div class="icon-box flex-center" @click="closeChapter(item)">
                 <i
                   class="el-icon-caret-bottom"
                   v-if="
@@ -83,6 +83,7 @@
                     <span
                       v-if="item.node_type === 'question'"
                       style="color: #409eff"
+                      class="m-a-4"
                       >题</span
                     >
                     <span
@@ -90,6 +91,9 @@
                       style="color: #e6a23c"
                       >段</span
                     >
+                    <span v-if="item.content.sn" class="m-r-2">
+                      {{item.content.sn}}.
+                    </span>
                     <span
                       class="html-render"
                       v-html="parseHtml(item.content.body)"
