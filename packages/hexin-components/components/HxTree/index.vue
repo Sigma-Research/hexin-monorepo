@@ -720,6 +720,7 @@ export default {
           if (orgNode.node_type === 'chapter') {
             this.$set(orgNode.content, 'level', targetParent.node_level + 1);
           }
+          this.$set(orgNode, 'order', target.order - 1);
           this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
           this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex - 1, 0, orgNode);
           this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
@@ -754,6 +755,7 @@ export default {
             if (orgNode.node_type === 'chapter') {
               this.$set(orgNode.content, 'level', target.node_level + 1);
             }
+            this.$set(orgNode, 'order', 1);
             this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
             this.riginalDataMap.get(target.node_id).children.unshift(orgNode);
             this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
@@ -787,6 +789,7 @@ export default {
             if (orgNode.node_type === 'chapter') {
               this.$set(orgNode.content, 'level', targetParent.node_level + 1);
             }
+            this.$set(orgNode, 'order', target.order + 1);
             this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
             this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex + 1, 0, orgNode);
             this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
