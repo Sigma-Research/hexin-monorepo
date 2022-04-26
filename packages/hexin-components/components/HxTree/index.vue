@@ -55,10 +55,9 @@
             'item-box',
             'flex-center',
           ]"
-          @click="nodeClick(item)"
         >
           <div class="item-padding" :style="paddingLeft(item)">
-            <div class="item-inner flex-center">
+            <div class="item-inner flex-center" @click="nodeClick(item)">
               <div class="icon-box flex-center" @click.stop="closeChapter(item)">
                 <i
                   class="el-icon-caret-bottom"
@@ -92,8 +91,8 @@
                       style="color: #e6a23c"
                       >段</span
                     >
-                    <span v-if="item.content.sn" class="m-r-2">
-                      {{item.content.sn}}.
+                    <span v-if="item.content.serial_number" class="m-r-2">
+                      {{item.content.serial_number}}.
                     </span>
                     <span
                       class="html-render"
@@ -289,14 +288,17 @@ export default {
   watch: {
     data() {
       this.init()
+      this.$forceUpdate()
     },
     expandAll() {
       this.init()
+      this.$forceUpdate()
     },
     checkAll(val) {
       this.flattenJson.forEach((node) => {
         node.checked = val
       })
+      this.$forceUpdate()
     },
   },
   computed: {
@@ -364,7 +366,7 @@ export default {
     closeChapter(item) {
       this.$set(item, '_closed', !item._closed);
     },
-    nodeClick () {
+    nodeClick (item) {
       this.$emit('node-click', this.riginalDataMap.get(item.node_id));
     },
     checkChange() {
