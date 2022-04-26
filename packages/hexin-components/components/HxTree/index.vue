@@ -146,73 +146,12 @@ import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import _cloneDeep from 'lodash/cloneDeep'
+import { iterateNode } from '../../common/utils/tree'
+import { uuid } from '../../common/utils/uuid';
 import { component as VueContextMenu } from '@xunlei/vue-context-menu'
-function* backIterate(list) {
-  for (let i = list.length - 1; i >= 0; i -= 1) {
-    yield list[i]
-  }
-}
-function* enumerate(iterable) {
-  let i = 0
-  for (const item of iterable) {
-    yield [item, i]
-    i += 1
-  }
-}
-function* iterateNode(
-  nodes,
-  {
-    level = 0,
-    parent = {},
-    parentItem = {},
-    back = false,
-    order = 'pre',
-    getChildren = (n) => n.children
-  } = {},
-) {
-  const iter = back ? backIterate(nodes) : nodes // 正向or反向
-  for (const [node, index] of enumerate(iter)) {
-    let stop = false
-    const stopIterateChildren = () => { // 停止遍历（当前节点的）子节点
-      stop = true
-    }
-    if (order === 'pre') { // 先序 dfs
-      yield { node, index, parent, siblings: nodes, level, stopIterateChildren, parentItem }
-    }
-    if (!stop) { // 递归遍历子节点
-      const children = getChildren(node)
-      if (children && children.length) {
-        yield* iterateNode(children, { level: level + 1, parent: node, back, order, getChildren, parentItem: { node, index, parent, siblings: nodes, level, stopIterateChildren, parentItem } })
-      }
-    }
-    if (order === 'post') { // 后序 dfs
-      yield { node, index, parent, siblings: nodes, level }
-    }
-  }
-}
-const randomString = (n, caseInsensitive) => {
-  let x = '0123456789abcdefghijklmnopqrstuvwxyz',
-    y = ''
-  if (!caseInsensitive) {
-    x += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  }
-  for (let i = 0; i < n; i++) {
-    y += x[Math.floor(Math.random() * x.length)]
-  }
-  return y
-}
-const uuid = (n = 25) => {
-  // 当前时间戳（hex）+ (n-5) 位随机串
-  let suffix = new Date().getTime().toString(16)
-  if (suffix.length > 5) {
-    suffix = suffix.substring(suffix.length - 5)
-  } else if (suffix.length < 5) {
-    suffix = new Array(6 - suffix.length).join('0') + suffix
-  }
-  return randomString(n - 5, true) + suffix
-}
+
 export default {
-  name: 'hexin-tree',
+  name: 'JsonCatalogTree',
   components: {
     RecycleScroller,
     VueContextMenu
@@ -339,8 +278,8 @@ export default {
       let { node_level: level } = node;
       return {
         'padding-left': 18 * (level - 1) + 'px',
-        'min-width': 'calc(100% - 100px)',
-        'max-width': 'calc(100% - 100px)',
+        'min-width': 'calc(100% - 40px)',
+        'max-width': 'calc(100% - 40px)',
       }
     },
     getItemBoxWidth() { 
@@ -854,8 +793,8 @@ export default {
       .item-operation {
         margin-right: 20px;
         height: 100%;
-        min-width: 100px;
-        max-width: 100px;
+        min-width: 40px;
+        max-width: 40px;
 
         .el-link{
           font-size: 15px;
