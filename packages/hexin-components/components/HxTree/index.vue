@@ -55,10 +55,11 @@
             'item-box',
             'flex-center',
           ]"
+          @click="nodeClick(item)"
         >
           <div class="item-padding" :style="paddingLeft(item)">
             <div class="item-inner flex-center">
-              <div class="icon-box flex-center" @click="closeChapter(item)">
+              <div class="icon-box flex-center" @click.stop="closeChapter(item)">
                 <i
                   class="el-icon-caret-bottom"
                   v-if="
@@ -361,12 +362,14 @@ export default {
       }
     },
     closeChapter(item) {
-      this.$emit('node-click', this.riginalDataMap.get(item.node_id));
       this.$set(item, '_closed', !item._closed);
+    },
+    nodeClick () {
+      this.$emit('node-click', this.riginalDataMap.get(item.node_id));
     },
     checkChange() {
       this.selectList = this.flattenJson.filter((item) => item.checked);
-      this.$emit('check-change', this.selectList);
+      this.$emit('check-change', this.selectList.map(item => this.riginalDataMap.get(item.node_id)));
     },
     html2text(html) {
       let el = document.createElement('div')
@@ -680,7 +683,7 @@ export default {
       } else {
         this.dragstartNode = [item];
       }
-      this.$emit('node-drag-start', e, this.dragstartNode)
+      this.$emit('node-drag-start', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)))
     },
     dropHandle(e) {
       e.preventDefault();
@@ -731,7 +734,7 @@ export default {
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === target), 0, node);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-          this.$emit('node-drag-end', e, this.dragstartNode, this.dragendNode, 'before')
+          this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'before')
         } else {
           if (target.node_type === 'chapter') {
             parent.children.splice(index, 1);
@@ -760,7 +763,7 @@ export default {
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-            this.$emit('node-drag-end', e, this.dragstartNode, this.dragendNode, 'inner')
+            this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'inner')
           } else {
             parent.children.splice(index, 1);
             targetParent.children.splice(targetIndex + 1, 0, node);
@@ -788,7 +791,7 @@ export default {
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-            this.$emit('node-drag-end', e, this.dragstartNode, this.dragendNode, 'after');
+            this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'after');
           }
         }
         this.$set(node, 'checked', false)
