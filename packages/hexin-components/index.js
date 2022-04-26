@@ -1,12 +1,12 @@
 // import TitleAnalysis from './components/TitleAnalysis/TitleAnalysis.vue'
 import JsonLevelAnalysis from './components/TitleAnalysisTools/JsonLevelAnalysis.vue'
-import JsonTree from './components/JsonTree/index.vue'
+// import JsonTree from './components/JsonTree/index.vue'
 import HxTree from './components/HxTree/index.vue'
 
 const components = {
   // TitleAnalysis,
   JsonLevelAnalysis,
-  JsonTree,
+  // JsonTree,
   HxTree
 }
 /**
