@@ -720,9 +720,10 @@ export default {
           if (orgNode.node_type === 'chapter') {
             this.$set(orgNode.content, 'level', targetParent.node_level + 1);
           }
-          this.$set(orgNode, 'order', this.riginalDataMap.get(target.node_id).order - 1);
-          this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
-          this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex - 1, 0, orgNode);
+          const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
+          this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
+          const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
+          this.riginalDataMap.get(targetParent.node_id).children.splice(orgTargetIndex, 0, orgNode);
           this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
             if (item.order !== index + 1) this.$set(item, 'order', index + 1)
           })
@@ -789,9 +790,10 @@ export default {
             if (orgNode.node_type === 'chapter') {
               this.$set(orgNode.content, 'level', targetParent.node_level + 1);
             }
-            this.$set(orgNode, 'order', this.riginalDataMap.get(target.node_id).order + 1);
-            this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
-            this.riginalDataMap.get(targetParent.node_id).children.splice(targetIndex + 1, 0, orgNode);
+            const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
+            this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
+            const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
+            this.riginalDataMap.get(targetParent.node_id).children.splice(orgTargetIndex + 1, 0, orgNode);
             this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
               if (item.order !== index + 1) this.$set(item, 'order', index + 1)
             })
