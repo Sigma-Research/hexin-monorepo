@@ -17,7 +17,9 @@
         @mouseover="nodeEvent(item, 'mouseover')"
         @mouseleave="nodeEvent(item, 'mouseleave')"
         @contextmenu="handleRightTap($event, item, 'contextmenu')"
-        :draggable="draggable && item._parent.node_type === 'chapter'"
+        :draggable="draggable &&
+          item._parent.node_type === 'chapter' && 
+          ((dragType === 'chapter' && item.node_type === 'chapter') || (dragType === 'content' && item.node_type !== 'chapter'))"
         @dragstart.stop="dragstartHandle($event, item)"
         @dragover.stop="dragoverHandle($event, item)"
         @dragend.stop="dragendHandle($event)"
@@ -275,6 +277,11 @@ export default {
       // 是否开启拖拽
       type: Boolean,
       default: false,
+    },
+    dragType: {
+      // 拖拽模式
+      type: String,
+      default: 'chapter',
     }
   },
   data() {
