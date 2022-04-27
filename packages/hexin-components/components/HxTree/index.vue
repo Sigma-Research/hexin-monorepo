@@ -378,7 +378,6 @@ export default {
     },
     nodeClick (item) {
       this.activeNodeId = item.node_id;
-      console.log(this.activeNodeId);
       this.$emit('node-click', this.riginalDataMap.get(item.node_id));
     },
     checkChange() {
