@@ -712,7 +712,10 @@ export default {
       e.preventDefault();
     },
     dragendHandle(e) {
-      for (let node of this.dragstartNode.reverse()) {
+      if (this.dragendType === 'after') {
+        this.dragstartNode.reverse();
+      }
+      for (let node of this.dragstartNode) {
         const parent = node._parent.node_id ? node._parent : undefined;
         const target = this.dragendNode;
         const targetParent = this.dragendNode._parent;
@@ -831,6 +834,7 @@ export default {
       if (this.dragendType === 'before') {
         pos = 'before';
       } else {
+        this.dragstartNode.reverse();
         if (this.dragendNode.node_type === 'chapter') {
           pos = 'inner';
         } else {
