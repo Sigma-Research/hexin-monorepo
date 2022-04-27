@@ -83,16 +83,17 @@
                     />
                     <span
                       v-if="item.node_type === 'question'"
-                      style="color: #409eff"
                       class="m-a-4"
-                      >题</span
                     >
+                      <span v-if="item.question_type === 'material'" style="color: #909399">材料</span>
+                      <span v-else style="color: #409eff">题</span>
+                    </span>
                     <span
                       v-if="item.node_type === 'paragraph'"
                       style="color: #e6a23c"
                       >段</span
                     >
-                    <span v-if="item.content.serial_number" class="m-r-2">
+                    <span v-if="item.content.serial_number && item.question_type !== 'material'" class="m-r-2">
                       {{item.content.serial_number}}.
                     </span>
                     <span
@@ -829,6 +830,7 @@ export default {
 
 <style lang="scss" scoped>
 .scroller {
+  margin-bottom: 50px;
   .item-style {
     position: relative;
     .item-level {
