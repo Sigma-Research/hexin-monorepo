@@ -17,7 +17,7 @@
         @mouseover="nodeEvent(item, 'mouseover')"
         @mouseleave="nodeEvent(item, 'mouseleave')"
         @contextmenu="handleRightTap($event, item, 'contextmenu')"
-        :draggable="item._parent.node_type === 'chapter'"
+        :draggable="draggable && item._parent.node_type === 'chapter'"
         @dragstart.stop="dragstartHandle($event, item)"
         @dragover.stop="dragoverHandle($event, item)"
         @dragend.stop="dragendHandle($event)"
@@ -28,7 +28,8 @@
           'drag-after-chapter': dragendNode === item && item.node_type === 'chapter' && dragendType === 'after',
           'drag-before-question': dragendNode === item && item.node_type !== 'chapter' && dragendType === 'before',
           'drag-after-question': dragendNode === item && item.node_type !== 'chapter' && dragendType === 'after',
-          'selected': selectList.includes(item)
+          'selected': selectList.includes(item),
+          'item-style-active': activeNodeId === item.node_id
         }"
       >
         <div
@@ -107,7 +108,7 @@
           </div>
           <div
             class="item-operation flex-center c-p"
-            v-if="item._parent.node_id && activeNodeId === item.node_id"
+            v-if="item._parent.node_id && hoverNodeId === item.node_id"
           >
             <!-- <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-top" @click="move(item, 'up')"/>
             <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-bottom" @click="move(item, 'down')"/> -->
@@ -266,8 +267,14 @@ export default {
       default: false,
     },
     contextMenu: {
+      // 右键操作功能列表
       type: Array,
       default: () => { return [] },
+    },
+    draggable: {
+      // 是否开启拖拽
+      type: Boolean,
+      default: false,
     }
   },
   data() {
@@ -276,6 +283,7 @@ export default {
       actNode: '',
       riginalDataMap: new Map(),
       loading: false,
+      hoverNodeId: '',
       activeNodeId: '',
       contextMenuVisible: false,
       renameDialogVisible: false,
@@ -369,6 +377,8 @@ export default {
       this.$set(item, '_closed', !item._closed);
     },
     nodeClick (item) {
+      this.activeNodeId = item.node_id;
+      console.log(this.activeNodeId);
       this.$emit('node-click', this.riginalDataMap.get(item.node_id));
     },
     checkChange() {
@@ -400,10 +410,10 @@ export default {
     },
     nodeEvent(item, eventName) {
       if (eventName === 'mouseleave') {
-        this.activeNodeId = '';
+        this.hoverNodeId = '';
         return;
       } else if (eventName === 'mouseover') {
-        this.activeNodeId = item.node_id
+        this.hoverNodeId = item.node_id
         return;
       }
     },
@@ -833,6 +843,11 @@ export default {
   margin-bottom: 50px;
   .item-style {
     position: relative;
+    &-active{
+      color: #409eff;
+      background-color: aliceblue;
+      opacity: 0.8;
+    }
     .item-level {
       margin-right: 5px;
       background: #eee;
