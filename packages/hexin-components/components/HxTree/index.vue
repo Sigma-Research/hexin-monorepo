@@ -755,7 +755,6 @@ export default {
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === target), 0, node);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-          this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'before')
         } else {
           if (target.node_type === 'chapter') {
             parent.children.splice(index, 1);
@@ -790,7 +789,6 @@ export default {
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-            this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'inner')
           } else {
             parent.children.splice(index, 1);
             targetParent.children.splice(targetIndex + 1, 0, node);
@@ -825,11 +823,21 @@ export default {
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-            this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), 'after');
           }
         }
         this.$set(node, 'checked', false)
       }
+      let pos;
+      if (this.dragendType === 'before') {
+        pos = 'before';
+      } else {
+        if (this.dragendNode.node_type === 'chapter') {
+          pos = 'inner';
+        } else {
+          pos = 'after';
+        }
+      }
+      this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), pos);
       this.dragendNode = '';
       this.selectList = [];
       return;
