@@ -712,7 +712,7 @@ export default {
       e.preventDefault();
     },
     dragendHandle(e) {
-      for (let node of this.dragstartNode) {
+      for (let node of this.dragstartNode.reverse()) {
         const parent = node._parent.node_id ? node._parent : undefined;
         const target = this.dragendNode;
         const targetParent = this.dragendNode._parent;
