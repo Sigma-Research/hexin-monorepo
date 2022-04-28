@@ -388,7 +388,7 @@ export default {
     },
     nodeClick (item) {
       this.activeNodeId = item.node_id;
-      if (item._parent.node_type === 'chapter') {
+      if (item.node_type === 'chapter' || item._parent.node_type === 'chapter') {
         this.$emit('node-click', this.riginalDataMap.get(item.node_id));
       }
     },
