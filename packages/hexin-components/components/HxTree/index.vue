@@ -90,7 +90,7 @@
                       v-if="item.node_type === 'question'"
                       class="m-a-4"
                     >
-                      <span v-if="item.question_type === 'material'" style="color: #909399">材料</span>
+                      <span v-if="item.question_type === 'material'" style="color: #909399">材</span>
                       <span v-else style="color: #409eff">题</span>
                     </div>
                     <div
