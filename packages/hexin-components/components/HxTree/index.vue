@@ -887,6 +887,7 @@ export default {
         box-sizing: border-box;
         .item-inner {
           height: 100%;
+          cursor: pointer;
           justify-content: space-between;
           .icon-box {
             min-width: 14px;
