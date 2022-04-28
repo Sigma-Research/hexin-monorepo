@@ -76,30 +76,33 @@
                 :class="{ 'act-node': actNode === item.node_id }"
               >
                 <slot name="content">
-                  <div class="style-tool-chapter-self">
-                    <el-checkbox
-                      v-if="showCheckbox && item.node_type !== 'chapter' && item._parent.node_type === 'chapter'"
-                      v-model="item.checked"
-                      @click.native.stop
-                      @change="checkChange"
-                      :disabled="!(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
-                    />
-                    <span
+                  <div class="flex-start">
+                    <div>
+                      <el-checkbox
+                        v-if="showCheckbox && item.node_type !== 'chapter' && item._parent.node_type === 'chapter'"
+                        v-model="item.checked"
+                        @click.native.stop
+                        @change="checkChange"
+                        :disabled="!(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
+                      />
+                    </div>
+                    <div
                       v-if="item.node_type === 'question'"
                       class="m-a-4"
                     >
                       <span v-if="item.question_type === 'material'" style="color: #909399">材料</span>
                       <span v-else style="color: #409eff">题</span>
-                    </span>
-                    <span
+                    </div>
+                    <div
                       v-if="item.node_type === 'paragraph'"
                       style="color: #e6a23c"
-                      >段</span
+                      class="m-a-4"
+                      >段</div
                     >
-                    <span v-if="item.content.serial_number && item.question_type !== 'material'" class="m-r-2">
+                    <div v-if="item.content.serial_number && item.question_type !== 'material'" class="m-r-2">
                       {{item.content.serial_number}}.
-                    </span>
-                    <span
+                    </div>
+                    <div
                       class="html-render"
                       v-html="parseHtml(item.content.body)"
                     />
@@ -906,10 +909,14 @@ export default {
           }
           .content-box {
             width: calc(100% - 16px);
-            .style-tool-chapter-self {
+            .html-render {
+              text-overflow: -o-ellipsis-lastline;
               overflow: hidden;
               text-overflow: ellipsis;
-              white-space: nowrap;
+              display: -webkit-box;
+              -webkit-line-clamp: 1;
+              line-clamp: 1;
+              -webkit-box-orient: vertical;
             }
           }
           .act-node {
@@ -959,15 +966,6 @@ export default {
   }
   .bold {
     font-weight: bold;
-  }
-  .style-tool-chapter-self {
-    text-overflow: -o-ellipsis-lastline;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
   }
   .html-render {
     display: inline;
@@ -1076,5 +1074,10 @@ export default {
 }
 .selected {
   background-color: rgb(253,242,231) !important;
+}
+.flex-start{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 </style>
