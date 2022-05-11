@@ -80,7 +80,7 @@
                     <div>
                       <el-checkbox
                         v-if="showCheckbox && item.node_type !== 'chapter' && item._parent.node_type === 'chapter'"
-                        v-model="item.checked"
+                        v-model="item._checked"
                         @click.native.stop
                         @change="checkChange"
                         :disabled="!(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
@@ -130,15 +130,15 @@
     >
       <a v-if="contextMenu.includes('addSon')" href="javascript:;" @click="handleAddChildren">增加子标题</a>
       <a v-if="contextMenu.includes('addSibling')" href="javascript:;" @click="handleAddSibling">增加平级标题</a>
-      <div class="line"></div>
+      <div v-if="contextMenu.includes('addSon') || contextMenu.includes('addSibling')" class="line"></div>
       <a v-if="contextMenu.includes('edit')" href="javascript:;" @click="handleEdit">编辑</a>
-      <div class="line"></div>
-      <!-- <a href="javascript:;" @click="handleMergeUp">快速导入</a>
-      <a href="javascript:;" @click="handleMergeDown">从体例导入</a>
-      <div class="line"></div> -->
+      <div v-if="contextMenu.includes('edit')" class="line"></div>
+      <a v-if="contextMenu.includes('quitExport')" href="javascript:;" @click="handleQuitExport">快速导入</a>
+      <a v-if="contextMenu.includes('styleExport')" href="javascript:;" @click="handleStyleExport">从体例导入</a>
+      <div v-if="contextMenu.includes('quitExport') || contextMenu.includes('styleExport')" class="line"></div>
       <a v-if="contextMenu.includes('addLevel')" href="javascript:;" @click="handleContentLevelAdd">升级</a>
       <a v-if="contextMenu.includes('reduceLevel')" href="javascript:;" @click="handleContentLevelReduce">降级</a>
-      <div class="line"></div>
+      <div v-if="contextMenu.includes('addLevel') || contextMenu.includes('reduceLevel')" class="line"></div>
       <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
       <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
     </VueContextMenu>
@@ -285,6 +285,11 @@ export default {
       // 拖拽模式
       type: String,
       default: 'chapter',
+    },
+    expandOnClickNode: {
+      // 是否在点击节点的时候展开或者收缩节点
+      type: Boolean,
+      default: true,
     }
   },
   data() {
@@ -316,7 +321,7 @@ export default {
     },
     checkAll(val) {
       this.flattenJson.forEach((node) => {
-        node.checked = val
+        node._checked = val
       })
       this.$forceUpdate()
     },
@@ -349,7 +354,7 @@ export default {
         node._closed = !this.expandAll
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
-          node.checked = this.checkAll
+          node._checked = this.checkAll
         }
         if (
           !this.checkAll &&
@@ -357,7 +362,7 @@ export default {
           (this.checkedKeys.includes(node.node_id) ||
             node._path.some((item) => this.checkedKeys.includes(item.node_id)))
         ) {
-          node.checked = true
+          node._checked = true
         }
         list.push(node)
       }
@@ -387,13 +392,18 @@ export default {
       this.$set(item, '_closed', !item._closed);
     },
     nodeClick (item) {
+      if (this.expandOnClickNode) {
+        this.$set(item, '_closed', !item._closed);
+        // Todo: 研究一下为什么 $set 设置没有更新计算属性的变化
+        this.flattenJson = [...this.flattenJson];
+      }
       this.activeNodeId = item.node_id;
       if (item.node_type === 'chapter' || item._parent.node_type === 'chapter') {
         this.$emit('node-click', this.riginalDataMap.get(item.node_id));
       }
     },
     checkChange() {
-      this.selectList = this.flattenJson.filter((item) => item.checked);
+      this.selectList = this.flattenJson.filter((item) => item._checked);
       this.$emit('check-change', this.selectList.map(item => this.riginalDataMap.get(item.node_id)));
     },
     html2text(html) {
@@ -430,6 +440,7 @@ export default {
     },
     handleRightTap(e, node, eventName) {
       this.currNode = node;
+      this.activeNodeId = node.node_id;
       e.returnValue = false;
       this.contextMenuVisible = true;
       const $contextmenu = document.querySelector(
@@ -454,7 +465,7 @@ export default {
       const nid = uuid();
       const newNode = {
         node_id: nid,
-        node_name: '<p>新增标题</p>',
+        node_name: '新增标题',
         node_level: this.currNode.node_level + 1,
         source_node_id: null,
         order: this.currNode.children.length,
@@ -466,15 +477,22 @@ export default {
         node_type: 'chapter',
       };
       // 更新原数据
-      if (this.data[0].node_parent_id) newNode.node_parent_id = this.currNode.node_id;
-      if (this.data[0].parent_id) newNode.parent_id = this.currNode.node_id;
-      if (this.data[0].task_id) newNode.task_id = this.currNode.task_id;
+      if (typeof this.data[0].node_parent_id === 'string') newNode.node_parent_id = this.currNode.node_id;
+      if (typeof this.data[0].parent_id === 'string') newNode.parent_id = this.currNode.node_id;
+      if (typeof this.data[0].task_id === 'string') newNode.task_id = this.currNode.task_id;
       this.riginalDataMap.get(this.currNode.node_id).children.push(newNode);
-      this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
-        if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-      })
-      this.riginalDataMap.set(newNode.node_id, newNode);
+      if (this.riginalDataMap.get(this.currNode._parent_id)) {
+        this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
+          if (item.order !== index + 1) this.$set(item, 'order', index + 1);
+        });
+      } else {
+        this.data.forEach((item, index) => {
+          if (item.order !== index + 1) this.$set(item, 'order', index + 1);
+        });
+      }
+      this.riginalDataMap.set(newNode.node_id, _cloneDeep(newNode));
       // 更新目录组件
+      newNode._checked = false;
       newNode._parent = this.currNode;
       newNode._path = [...this.currNode._path, this.currNode];
       newNode._closed = false;
@@ -483,10 +501,10 @@ export default {
       const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === this.currNode.node_id));
       this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === this.currNode.node_id)));
       this.flattenJson.splice(tagetIndex + 1, 0, newNode);
-      this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren)
+      this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren);
       this.currNode.children.push(newNode);
       this.$message.success('创建成功');
-      this.$emit('add-node-children', this.riginalDataMap.get(newNode.node_id))
+      this.$emit('add-node-children', this.riginalDataMap.get(newNode.node_id));
       this.contextMenuVisible = false;
     },
     handleAddSibling() {
@@ -497,7 +515,7 @@ export default {
       const nid = uuid();
       const newNode = {
         node_id: nid,
-        node_name: '<p>新增标题</p>',
+        node_name: '新增标题',
         node_level: this.currNode.node_level,
         source_node_id: null,
         order: this.currNode.order + 1,
@@ -509,15 +527,22 @@ export default {
         node_type: 'chapter',
       };
       // 更新原数据
-      if (this.data[0].node_parent_id) newNode.node_parent_id = this.currNode.node_parent_id;
-      if (this.data[0].parent_id) newNode.parent_id = this.currNode.parent_id;
-      if (this.data[0].task_id) newNode.task_id = this.currNode.task_id;
-      const currNodeIndex = this.currNode._parent.children.findIndex(item => item.node_id === this.currNode.node_id)
-      this.riginalDataMap.get(this.currNode._parent_id).children.splice(currNodeIndex + 1, 0, newNode);
-      this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
-        if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-      })
-      this.riginalDataMap.set(newNode.node_id, newNode);
+      if (typeof this.data[0].node_parent_id === 'string') newNode.node_parent_id = this.currNode.node_parent_id;
+      if (typeof this.data[0].parent_id === 'string') newNode.parent_id = this.currNode.parent_id;
+      if (typeof this.data[0].task_id === 'string') newNode.task_id = this.currNode.task_id;
+      const currNodeIndex = this.currNode._parent.children.findIndex(item => item.node_id === this.currNode.node_id);
+      if (this.riginalDataMap.get(this.currNode._parent_id)) {
+        this.riginalDataMap.get(this.currNode._parent_id).children.splice(currNodeIndex + 1, 0, newNode);
+        this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
+          if (item.order !== index + 1) this.$set(item, 'order', index + 1);
+        });
+      } else {
+        this.data.splice(currNodeIndex + 1, 0, newNode);
+        this.data.forEach((item, index) => {
+          if (item.order !== index + 1) this.$set(item, 'order', index + 1);
+        });
+      }
+      this.riginalDataMap.set(newNode.node_id, _cloneDeep(newNode));
       // 更新目录组件
       newNode._parent = this.currNode._parent;
       newNode._path = [...this.currNode._path];
@@ -527,23 +552,23 @@ export default {
       const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === this.currNode.node_id));
       this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === this.currNode.node_id)));
       this.flattenJson.splice(tagetIndex + 1, 0, newNode);
-      this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren)
+      this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren);
       this.currNode._parent.children.splice(currNodeIndex + 1, 0, newNode);
       this.$message.success('创建成功');
-      this.$emit('add-node-sibling', this.riginalDataMap.get(newNode.node_id))
+      this.$emit('add-node-sibling', this.riginalDataMap.get(newNode.node_id));
       this.contextMenuVisible = false;
     },
     handleContentLevelAdd() {
       this.$set(this.currNode.content, 'level', this.currNode.content.level + 1);
       this.$set(this.riginalDataMap.get(this.currNode.node_id).content, 'level', this.currNode.content.level);
-      this.$emit('node-level-add', this.riginalDataMap.get(this.currNode.node_id))
+      this.$emit('content-level-add', this.riginalDataMap.get(this.currNode.node_id))
       this.contextMenuVisible = false;
     },
     handleContentLevelReduce() {
       if (this.currNode.content.level > 1) {
         this.$set(this.currNode.content, 'level', this.currNode.content.level - 1);
         this.$set(this.riginalDataMap.get(this.currNode.node_id).content, 'level', this.currNode.content.level);
-        this.$emit('node-level-reduce', this.riginalDataMap.get(this.currNode.node_id))
+        this.$emit('content-level-reduce', this.riginalDataMap.get(this.currNode.node_id))
       }
       this.contextMenuVisible = false;
     },
@@ -839,7 +864,7 @@ export default {
             this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
           }
         }
-        this.$set(node, 'checked', false)
+        this.$set(node, '_checked', false)
       }
       let pos;
       if (this.dragendType === 'before') {
@@ -857,6 +882,22 @@ export default {
       this.selectList = [];
       return;
     },
+    handleQuitExport() {
+      if (!this.currNode || this.currNode.node_type !== 'chapter') {
+        this.contextMenuVisible = false;
+        return;
+      }
+      this.$emit('quit-export', this.currNode.node_id)
+      this.contextMenuVisible = false;
+    },
+    handleStyleExport() {
+      if (!this.currNode || this.currNode.node_type !== 'chapter') {
+        this.contextMenuVisible = false;
+        return;
+      }
+      this.$emit('style-export', this.currNode.node_id)
+      this.contextMenuVisible = false;
+    }
   },
 }
 </script>
