@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 100%; overflow-y: auto;">
+  <div class="hexin-tree" style="height: 100%; overflow-y: auto;">
     <RecycleScroller
       class="scroller"
       :items="list"
@@ -18,6 +18,7 @@
         @mouseleave="nodeEvent(item, 'mouseleave')"
         @contextmenu="handleRightTap($event, item, 'contextmenu')"
         :draggable="draggable &&
+          !disableNodeKeys.includes(item.node_id) &&
           item._parent.node_type === 'chapter' && 
           ((dragType === 'chapter' && item.node_type === 'chapter') || (dragType === 'content' && item.node_type !== 'chapter'))"
         @dragstart.stop="dragstartHandle($event, item)"
@@ -25,13 +26,14 @@
         @dragend.stop="dragendHandle($event)"
         @drop.stop="dropHandle"
         :class="{
-          'drag': dragendNode === item,
-          'drag-before-chapter': dragendNode === item && item.node_type === 'chapter' && dragendType === 'before',
-          'drag-after-chapter': dragendNode === item && item.node_type === 'chapter' && dragendType === 'after',
-          'drag-before-question': dragendNode === item && item.node_type !== 'chapter' && dragendType === 'before',
-          'drag-after-question': dragendNode === item && item.node_type !== 'chapter' && dragendType === 'after',
+          'drag': !disableNodeKeys.includes(item.node_id) && dragendNode === item,
+          'drag-before-chapter': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'before',
+          'drag-after-chapter': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'after',
+          'drag-before-question': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type !== 'chapter' && dragendType === 'before',
+          'drag-after-question': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type !== 'chapter' && dragendType === 'after',
           'selected': selectList.includes(item),
-          'item-style-active': activeNodeId === item.node_id
+          'item-style-active': activeNodeId === item.node_id,
+          'disable-node': disableNodeKeys.includes(item.node_id)
         }"
       >
         <div
@@ -83,7 +85,7 @@
                         v-model="item._checked"
                         @click.native.stop
                         @change="checkChange"
-                        :disabled="!(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
+                        :disabled="disableNodeKeys.includes(item.node_id) || !(item._parent === (selectList.length ? selectList[0]._parent : item._parent))"
                       />
                     </div>
                     <div
@@ -117,7 +119,8 @@
           >
             <!-- <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-top" @click="move(item, 'up')"/>
             <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-bottom" @click="move(item, 'down')"/> -->
-            <el-link type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
+            <el-link v-if="!disableNodeKeys.includes(item.node_id)" type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
+            <el-link v-else disabled type="info" :underline="false" icon="el-icon-lock"/>
           </div>
         </div>
       </div>
@@ -142,8 +145,8 @@
       <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
       <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
     </VueContextMenu>
-    <el-dialog class="c-node-rename" title="标题编辑" :visible="renameDialogVisible">
-      <el-input v-model="rename" autocomplete="off" />
+    <el-dialog width="500px" title="标题编辑" :visible="renameDialogVisible">
+      <el-input v-model="rename" autocomplete="off" class="m-v-20"/>
       <div slot="footer" class="dialog-footer">
         <el-button size="mini" @click="renameDialogVisible = false">取消</el-button>
         <el-button type="primary" size="mini" @click="handleRename">确定</el-button>
@@ -279,7 +282,7 @@ export default {
     draggable: {
       // 是否开启拖拽
       type: Boolean,
-      default: false,
+      default: true,
     },
     dragType: {
       // 拖拽模式
@@ -290,13 +293,18 @@ export default {
       // 是否在点击节点的时候展开或者收缩节点
       type: Boolean,
       default: true,
+    },
+    disableNodeKeys: {
+      // 需要 disable 的节点列表
+      type: Array,
+      default: () => { return [] },
     }
   },
   data() {
     return {
       flattenJson: [],
-      actNode: '',
       riginalDataMap: new Map(),
+      actNode: '',
       loading: false,
       hoverNodeId: '',
       activeNodeId: '',
@@ -348,9 +356,10 @@ export default {
       for (const { node } of iterateNode(this.data)) {
         this.riginalDataMap.set(node.node_id, node)
       }
+      this.riginalDataMap.set('root', { node_id: 'root', children: this.data, node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} })
       for (const { node, parent } of iterateNode(json)) {
-        node._parent_id = parent.node_id ? parent.node_id : ''
-        node._parent = parent ? parent : ''
+        node._parent_id = parent.node_id ? parent.node_id : 'root'
+        node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
         node._closed = !this.expandAll
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
@@ -390,6 +399,8 @@ export default {
     },
     closeChapter(item) {
       this.$set(item, '_closed', !item._closed);
+      // Todo: 研究一下为什么 $set 设置没有更新计算属性的变化
+      this.flattenJson = [...this.flattenJson];
     },
     nodeClick (item) {
       if (this.expandOnClickNode) {
@@ -439,23 +450,29 @@ export default {
       }
     },
     handleRightTap(e, node, eventName) {
+      if (this.disableNodeKeys.includes(node.node_id)) return;
       this.currNode = node;
       this.activeNodeId = node.node_id;
       e.returnValue = false;
       this.contextMenuVisible = true;
-      const $contextmenu = document.querySelector(
-        '.c-node-tree-context-menu',
-      );
-      if (!$contextmenu) return;
-      if (eventName === 'contextmenu') {
-        $contextmenu.style.top = `${e.clientY + 5}px`;
-        $contextmenu.style.left = `${e.clientX + 10}px`;
-        return;
-      } else if (eventName === 'click') {
-        $contextmenu.style.top = `${e.clientY + 5}px`;
-        $contextmenu.style.left = `${e.clientX - 150}px`;
-        return;
-      }
+      this.$nextTick(() => {
+        const $contextmenu = document.querySelector(
+          '.c-node-tree-context-menu',
+        );
+        if (!$contextmenu) return;
+        // const container = document.querySelector('.hexin-tree');
+        const maxLeft = document.body.clientWidth - $contextmenu.clientWidth;
+        const maxTop = document.body.clientHeight - $contextmenu.clientHeight;
+        if (eventName === 'contextmenu') {
+          $contextmenu.style.top = `${e.clientY + 5 > maxTop ? maxTop - 10 : e.clientY + 5}px`;
+          $contextmenu.style.left = `${e.clientX + 10 > maxLeft ? maxLeft : e.clientX + 10}px`;
+          return;
+        } else if (eventName === 'click') {
+          $contextmenu.style.top = `${e.clientY + 5 > maxTop ? maxTop - 10 : e.clientY + 5}px`;
+          $contextmenu.style.left = `${e.clientX + 10 > maxLeft ? maxLeft : e.clientX + 10}px`;
+          return;
+        }
+      })
     },
     handleAddChildren() {
       if (!this.currNode || this.currNode.node_type !== 'chapter') {
@@ -748,13 +765,14 @@ export default {
       e.preventDefault();
     },
     dragendHandle(e) {
+      if (this.dragstartNode.some(item => this.disableNodeKeys.includes(item.node_id)) || this.disableNodeKeys.includes(this.dragendNode.node_id)) return;
       if (this.dragendType === 'after') {
         this.dragstartNode.reverse();
       }
       for (let node of this.dragstartNode) {
         const parent = node._parent.node_id ? node._parent : undefined;
         const target = this.dragendNode;
-        const targetParent = this.dragendNode._parent;
+        const targetParent = this.dragendNode._parent.node_id ? this.dragendNode._parent : undefined;
         if (target === node) return this.dragendNode = '';
         if (!node || !parent || !target || !targetParent) return this.dragendNode = '';
         if (targetParent.node_type !== 'chapter') return this.dragendNode = '';
@@ -1123,5 +1141,10 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+.disable-node{
+  cursor: default !important;
+  background-color: #eee !important;
+  color: #aaa !important;
 }
 </style>
