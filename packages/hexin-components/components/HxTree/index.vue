@@ -320,6 +320,7 @@ export default {
   },
   watch: {
     data() {
+      this.selectList = []
       this.init()
       this.$forceUpdate()
     },
@@ -332,7 +333,7 @@ export default {
         node._checked = val
       })
       this.$forceUpdate()
-    },
+    }
   },
   computed: {
     list() {
