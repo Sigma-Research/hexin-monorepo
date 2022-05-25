@@ -42,11 +42,10 @@ import { deepClone } from '../../common/utils/json'
 import { treeIterate, findNodePath } from '../../common/utils/tree'
 import { uuid } from '../../common/utils/uuid'
 import { TJson, TNode } from '../../common/types/json'
-import mockJson from './mock'
 
 @Component
 export default class TitleAnalysis extends Vue {
-  @Prop({ default: mockJson }) public json!: TJson[]
+  @Prop({ default: [] }) public json!: TJson[]
 
   // 当前展开的标题路径
   public activeNode: string = ''

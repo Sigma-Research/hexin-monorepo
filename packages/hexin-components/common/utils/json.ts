@@ -64,7 +64,6 @@ export const safeStringify = (json: any) => {
   try {
     return JSON.stringify(json)
   } catch (e) {
-    console.error(e)
     return ''
   }
 }
