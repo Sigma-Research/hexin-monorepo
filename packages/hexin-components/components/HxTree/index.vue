@@ -20,7 +20,7 @@
         :draggable="draggable &&
           !disableNodeKeys.includes(item.node_id) &&
           item._parent.node_type === 'chapter' && 
-          ((dragType === 'chapter' && item.node_type === 'chapter') || (dragType === 'content' && item.node_type !== 'chapter'))"
+          ((dragType === '') || (dragType === 'chapter' && item.node_type === 'chapter') || (dragType === 'content' && item.node_type !== 'chapter'))"
         @dragstart.stop="dragstartHandle($event, item)"
         @dragover.stop="dragoverHandle($event, item)"
         @dragend.stop="dragendHandle($event)"
@@ -287,7 +287,7 @@ export default {
     dragType: {
       // 拖拽模式
       type: String,
-      default: 'chapter',
+      default: '',
     },
     expandOnClickNode: {
       // 是否在点击节点的时候展开或者收缩节点
