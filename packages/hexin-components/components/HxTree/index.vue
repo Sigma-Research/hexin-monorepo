@@ -144,6 +144,7 @@
       <div v-if="contextMenu.includes('addLevel') || contextMenu.includes('reduceLevel')" class="line"></div>
       <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
       <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
+      <a v-if="contextMenu.includes('delete')" href="javascript:;" @click="handleDelete()">删除</a>
     </VueContextMenu>
     <el-dialog width="500px" title="标题编辑" :visible="renameDialogVisible">
       <el-input v-model="rename" autocomplete="off" class="m-v-20"/>
