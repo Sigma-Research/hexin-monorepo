@@ -16,7 +16,7 @@
         style="justify-content: space-between"
         @mouseover="nodeEvent(item, 'mouseover')"
         @mouseleave="nodeEvent(item, 'mouseleave')"
-        @contextmenu="handleRightTap($event, item, 'contextmenu')"
+        @contextmenu="item.node_type === 'chapter' ? handleRightTap($event, item, 'contextmenu') : ''"
         :draggable="draggable &&
           !disableNodeKeys.includes(item.node_id) &&
           item._parent.node_type === 'chapter' && 
@@ -144,7 +144,7 @@
       <div v-if="contextMenu.includes('addLevel') || contextMenu.includes('reduceLevel')" class="line"></div>
       <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
       <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
-      <a v-if="contextMenu.includes('delete')" href="javascript:;" @click="handleDelete()">删除</a>
+      <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete()">删除</a>
     </VueContextMenu>
     <el-dialog width="500px" title="标题编辑" :visible="renameDialogVisible">
       <el-input v-model="rename" autocomplete="off" class="m-v-20"/>
@@ -741,6 +741,17 @@ export default {
           })
           this.$emit('delete-node-one', this.riginalDataMap.get(this.currNode.node_id), index, this.riginalDataMap.get(this.currNode._parent_id))
         }
+        this.flattenJson.splice(this.flattenJson.findIndex(item => item.node_id === this.currNode.node_id), 1)
+      } else {
+        const children = this.flattenJson.filter(node => node._path.some(item => item.node_id === this.currNode.node_id));
+        if (children.length) return this.$alert('该标题含有子节点，请将子节点移出重试', '', {confirmButtonText: '我知道了'});
+        this.currNode._parent.children.splice(index, 1);
+        // 更新原数据
+        this.riginalDataMap.get(this.currNode._parent_id).children.splice(index, 1);
+        this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
+          if (item.order !== index + 1) this.$set(item, 'order', index + 1)
+        })
+        this.$emit('delete-node', this.riginalDataMap.get(this.currNode.node_id), index, this.riginalDataMap.get(this.currNode._parent_id))
         this.flattenJson.splice(this.flattenJson.findIndex(item => item.node_id === this.currNode.node_id), 1)
       }
       this.$message.success('删除成功');
