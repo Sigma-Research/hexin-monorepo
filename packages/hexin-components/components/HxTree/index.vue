@@ -746,7 +746,7 @@ export default {
         this.flattenJson.splice(this.flattenJson.findIndex(item => item.node_id === this.currNode.node_id), 1)
       } else {
         const children = this.flattenJson.filter(node => node._path.some(item => item.node_id === this.currNode.node_id));
-        if (children.length) return this.$alert('该标题含有子节点，请将子节点移出重试', '', {confirmButtonText: '我知道了'});
+        if (children.length) return this.$alert('该标题含有内容，请将内容移出后重试', '', {confirmButtonText: '我知道了'});
         this.currNode._parent.children.splice(index, 1);
         // 更新原数据
         this.riginalDataMap.get(this.currNode._parent_id).children.splice(index, 1);
