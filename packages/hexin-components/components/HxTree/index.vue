@@ -499,7 +499,8 @@ export default {
       if (typeof this.data[0].node_parent_id === 'string') newNode.node_parent_id = this.currNode.node_id;
       if (typeof this.data[0].parent_id === 'string') newNode.parent_id = this.currNode.node_id;
       if (typeof this.data[0].task_id === 'string') newNode.task_id = this.currNode.task_id;
-      this.riginalDataMap.get(this.currNode.node_id).children.push(newNode);
+      const riginalNewNode = _cloneDeep(newNode);
+      this.riginalDataMap.get(this.currNode.node_id).children.push(riginalNewNode);
       if (this.riginalDataMap.get(this.currNode._parent_id)) {
         this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
           if (item.order !== index + 1) this.$set(item, 'order', index + 1);
@@ -509,7 +510,7 @@ export default {
           if (item.order !== index + 1) this.$set(item, 'order', index + 1);
         });
       }
-      this.riginalDataMap.set(newNode.node_id, _cloneDeep(newNode));
+      this.riginalDataMap.set(newNode.node_id, riginalNewNode);
       // 更新目录组件
       newNode._checked = false;
       newNode._parent = this.currNode;
@@ -550,8 +551,9 @@ export default {
       if (typeof this.data[0].parent_id === 'string') newNode.parent_id = this.currNode.parent_id;
       if (typeof this.data[0].task_id === 'string') newNode.task_id = this.currNode.task_id;
       const currNodeIndex = this.currNode._parent.children.findIndex(item => item.node_id === this.currNode.node_id);
+      const riginalNewNode = _cloneDeep(newNode);
       if (this.riginalDataMap.get(this.currNode._parent_id)) {
-        this.riginalDataMap.get(this.currNode._parent_id).children.splice(currNodeIndex + 1, 0, newNode);
+        this.riginalDataMap.get(this.currNode._parent_id).children.splice(currNodeIndex + 1, 0, riginalNewNode);
         this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
           if (item.order !== index + 1) this.$set(item, 'order', index + 1);
         });
@@ -561,7 +563,7 @@ export default {
           if (item.order !== index + 1) this.$set(item, 'order', index + 1);
         });
       }
-      this.riginalDataMap.set(newNode.node_id, _cloneDeep(newNode));
+      this.riginalDataMap.set(newNode.node_id, riginalNewNode);
       // 更新目录组件
       newNode._parent = this.currNode._parent;
       newNode._path = [...this.currNode._path];
