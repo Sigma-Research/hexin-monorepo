@@ -331,6 +331,11 @@ export default {
       this.$forceUpdate()
     },
     expandAll() {
+      this.expandNumber = 0
+      this.init()
+      this.$forceUpdate()
+    },
+    expandNumber() {
       this.init()
       this.$forceUpdate()
     },
@@ -362,6 +367,7 @@ export default {
   },
   methods: {
     init() {
+      let treeDeep = 0
       const list = []
       const json = _cloneDeep(this.data);
       for (const { node } of iterateNode(this.data)) {
@@ -811,7 +817,7 @@ export default {
           targetParent.children.splice(targetIndex - 1, 0, node);
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
-          this.$set(orgNode, 'parent_id', targetParent.node_id);
+          this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
           this.$set(orgNode, 'node_level', targetParent.node_level + 1);
           if (orgNode.node_type === 'chapter') {
             this.$set(orgNode.content, 'level', targetParent.node_level + 1);
@@ -846,7 +852,7 @@ export default {
             target.children.unshift(node);
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
-            this.$set(orgNode, 'parent_id', target.node_id);
+            this.$set(orgNode, 'parent_id', target.node_id === 'root' ? '' : target.node_id);
             this.$set(orgNode, 'node_level', target.node_level + 1);
             if (orgNode.node_type === 'chapter') {
               this.$set(orgNode.content, 'level', target.node_level + 1);
@@ -879,7 +885,7 @@ export default {
             targetParent.children.splice(targetIndex + 1, 0, node);
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
-            this.$set(orgNode, 'parent_id', targetParent.node_id);
+            this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
             this.$set(orgNode, 'node_level', targetParent.node_level + 1);
             if (orgNode.node_type === 'chapter') {
               this.$set(orgNode.content, 'level', targetParent.node_level + 1);
