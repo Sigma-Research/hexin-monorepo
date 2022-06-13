@@ -372,12 +372,12 @@ export default {
       for (const { node, parent } of iterateNode(json)) {
         node._parent_id = parent.node_id ? parent.node_id : 'root'
         node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
-        if(this.expandAll){
+        if (this.expandAll) {
           treeDeep = 999
-        }else{
+        } else {
           treeDeep = 0
         }
-        if(this.expandNumber>0){
+        if (this.expandNumber > 0) {
           treeDeep = this.expandNumber
         }
         node.node_level <= treeDeep ? node._closed = false : node._closed = true
