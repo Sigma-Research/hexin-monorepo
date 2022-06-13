@@ -245,6 +245,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    expandNumber: {
+      // 按层级展开
+      type: Number,
+      default: 0,
+    },
     checkAll: {
       // 全部选中或全部不选中
       type: Boolean,
@@ -326,6 +331,11 @@ export default {
       this.$forceUpdate()
     },
     expandAll() {
+      this.expandNumber = 0
+      this.init()
+      this.$forceUpdate()
+    },
+    expandNumber() {
       this.init()
       this.$forceUpdate()
     },
@@ -353,6 +363,7 @@ export default {
   },
   methods: {
     init() {
+      let treeDeep = 0
       const list = []
       const json = _cloneDeep(this.data);
       for (const { node } of iterateNode(this.data)) {
@@ -362,7 +373,15 @@ export default {
       for (const { node, parent } of iterateNode(json)) {
         node._parent_id = parent.node_id ? parent.node_id : 'root'
         node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
-        node._closed = !this.expandAll
+        if (this.expandAll) {
+          treeDeep = 999
+        } else {
+          treeDeep = 0
+        }
+        if (this.expandNumber > 0) {
+          treeDeep = this.expandNumber
+        }
+        node._closed = node.node_level > treeDeep
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
           node._checked = this.checkAll
