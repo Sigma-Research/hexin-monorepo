@@ -248,7 +248,7 @@ export default {
     expandNumber: {
       // 按层级展开
       type: Number,
-      default: 0,
+      default: -1,
     },
     checkAll: {
       // 全部选中或全部不选中
@@ -339,6 +339,10 @@ export default {
       this.init()
       this.$forceUpdate()
     },
+    expandNumber() {
+      this.init()
+      this.$forceUpdate()
+    },
     checkAll(val) {
       this.flattenJson.forEach((node) => {
         node._checked = val
@@ -373,15 +377,11 @@ export default {
       for (const { node, parent } of iterateNode(json)) {
         node._parent_id = parent.node_id ? parent.node_id : 'root'
         node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
-        if (this.expandAll) {
-          treeDeep = 999
+        if (this.expandNumber === -1) {
+            node._closed = !this.expandAll
         } else {
-          treeDeep = 0
+          node._closed = node.node_level > this.expandNumber
         }
-        if (this.expandNumber > 0) {
-          treeDeep = this.expandNumber
-        }
-        node._closed = node.node_level > treeDeep
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
           node._checked = this.checkAll
