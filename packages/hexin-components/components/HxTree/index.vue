@@ -331,6 +331,7 @@ export default {
       this.$forceUpdate()
     },
     expandAll() {
+      this.expandNumber = 0
       this.init()
       this.$forceUpdate()
     },
@@ -380,7 +381,7 @@ export default {
         if (this.expandNumber > 0) {
           treeDeep = this.expandNumber
         }
-        node.node_level <= treeDeep ? node._closed = false : node._closed = true
+        node._closed = node.node_level > treeDeep
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
           node._checked = this.checkAll
