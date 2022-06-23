@@ -1,5 +1,5 @@
 <template>
-  <div class="hexin-tree" style="height: 100%; overflow-y: auto;">
+  <div class="hexin-tree">
     <RecycleScroller
       class="scroller"
       :items="list"
@@ -367,7 +367,6 @@ export default {
   },
   methods: {
     init() {
-      let treeDeep = 0
       const list = []
       const json = _cloneDeep(this.data);
       for (const { node } of iterateNode(this.data)) {
@@ -378,7 +377,7 @@ export default {
         node._parent_id = parent.node_id ? parent.node_id : 'root'
         node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
         if (this.expandNumber === -1) {
-            node._closed = !this.expandAll
+          node._closed = !this.expandAll
         } else {
           node._closed = node.node_level > this.expandNumber
         }
@@ -815,6 +814,7 @@ export default {
         if (this.dragendType === 'before') {
           parent.children.splice(index, 1);
           targetParent.children.splice(targetIndex - 1, 0, node);
+          const levelChangeCount = targetParent.node_level + 1 - node.node_level;
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
           this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
@@ -832,8 +832,14 @@ export default {
           this.riginalDataMap.get(targetParent.node_id).children.forEach((item, index) => {
             if (item.order !== index + 1) this.$set(item, 'order', index + 1)
           })
+          for (const { node } of iterateNode([orgNode])) {
+            const node_level = node.node_level + levelChangeCount
+            this.$set(node, 'node_level', node_level);
+            if (node.node_type === 'chapter') {
+              this.$set(node.content, 'level', node_level);
+            }
+          }
           // 更新目录树
-          const levelChangeCount = targetParent.node_level + 1 - node.node_level;
           this.$set(node, 'node_level', targetParent.node_level + 1);
           this.$set(node, '_path', [...targetParent._path, targetParent]);
           this.$set(node, '_parent', targetParent);
@@ -850,6 +856,7 @@ export default {
           if (target.node_type === 'chapter') {
             parent.children.splice(index, 1);
             target.children.unshift(node);
+            const levelChangeCount = target.node_level + 1 - node.node_level;
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
             this.$set(orgNode, 'parent_id', target.node_id === 'root' ? '' : target.node_id);
@@ -866,8 +873,14 @@ export default {
             this.riginalDataMap.get(target.node_id).children.forEach((item, index) => {
               if (item.order !== index + 1) this.$set(item, 'order', index + 1)
             })
+            for (const { node } of iterateNode([orgNode])) {
+              const node_level = node.node_level + levelChangeCount
+              this.$set(node, 'node_level', node_level);
+              if (node.node_type === 'chapter') {
+                this.$set(node.content, 'level', node_level);
+              }
+            }
             // 更新目录树
-            const levelChangeCount = target.node_level + 1 - node.node_level;
             this.$set(node, 'node_level', target.node_level + 1);
             this.$set(node, '_path', [...target._path, target]);
             this.$set(node, '_parent', target);
@@ -883,6 +896,7 @@ export default {
           } else {
             parent.children.splice(index, 1);
             targetParent.children.splice(targetIndex + 1, 0, node);
+            const levelChangeCount = targetParent.node_level + 1 - node.node_level;
             // 更新原数据
             const orgNode = this.riginalDataMap.get(node.node_id);
             this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
@@ -900,8 +914,14 @@ export default {
             this.riginalDataMap.get(targetParent.node_id).children.forEach((item, index) => {
               if (item.order !== index + 1) this.$set(item, 'order', index + 1)
             })
+            for (const { node } of iterateNode([orgNode])) {
+              const node_level = node.node_level + levelChangeCount
+              this.$set(node, 'node_level', node_level);
+              if (node.node_type === 'chapter') {
+                this.$set(node.content, 'level', node_level);
+              }
+            }
             // 更新目录树
-            const levelChangeCount = targetParent.node_level + 1 - node.node_level;
             this.$set(node, 'node_level', targetParent.node_level + 1);
             this.$set(node, '_path', [...targetParent._path, targetParent]);
             this.$set(node, '_parent', targetParent);
