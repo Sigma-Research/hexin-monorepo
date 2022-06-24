@@ -1,5 +1,5 @@
 <template>
-  <div class="hexin-tree">
+  <div class="hexin-tree" style="height: 100%; overflow-y: auto;">
     <RecycleScroller
       class="scroller"
       :items="list"
