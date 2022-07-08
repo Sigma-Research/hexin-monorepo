@@ -115,7 +115,7 @@
           </div>
           <div
             class="item-operation flex-center c-p"
-            v-if="item._parent.node_id && hoverNodeId === item.node_id"
+            v-if="item._parent.node_id && hoverNodeId === item.node_id && contextMenu.length"
           >
             <!-- <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-top" @click="move(item, 'up')"/>
             <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-bottom" @click="move(item, 'down')"/> -->
@@ -401,8 +401,8 @@ export default {
       let { node_level: level } = node;
       return {
         'padding-left': 18 * (level - 1) + 'px',
-        'min-width': 'calc(100% - 40px)',
-        'max-width': 'calc(100% - 40px)',
+        'min-width': this.contextMenu.length ? 'calc(100% - 40px)' : '100%',
+        'max-width': this.contextMenu.length ? 'calc(100% - 40px)' : '100%',
       }
     },
     getItemBoxWidth() { 
