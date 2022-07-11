@@ -453,6 +453,14 @@ export default {
           throwOnError: false,
         })
       })
+      html = html.replace(/\$(.*?)\$/gi, function (match, tex) {
+        return katex.renderToString(tex, {
+          output: 'html',
+          displayMode: true,
+          strict: false,
+          throwOnError: false,
+        });
+      });
       return html
     },
     nodeEvent(item, eventName) {
