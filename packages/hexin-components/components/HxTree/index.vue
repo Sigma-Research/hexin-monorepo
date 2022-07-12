@@ -27,10 +27,9 @@
         @drop.stop="dropHandle"
         :class="{
           'drag': !disableNodeKeys.includes(item.node_id) && dragendNode === item,
-          'drag-before-chapter': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'before',
-          'drag-after-chapter': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'after',
-          'drag-before-question': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type !== 'chapter' && dragendType === 'before',
-          'drag-after-question': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type !== 'chapter' && dragendType === 'after',
+          'drag-before': !disableNodeKeys.includes(item.node_id) && dragendNode === item && dragendType === 'before',
+          'drag-after': !disableNodeKeys.includes(item.node_id) && dragendNode === item && dragendType === 'after',
+          'drag-inner': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'inner',
           'selected': selectList.includes(item),
           'item-style-active': activeNodeId === item.node_id,
           'disable-node': disableNodeKeys.includes(item.node_id)
@@ -309,6 +308,7 @@ export default {
   data() {
     return {
       flattenJson: [],
+      flattenDataMap: new Map(),
       riginalDataMap: new Map(),
       actNode: '',
       loading: false,
@@ -376,10 +376,14 @@ export default {
       for (const { node, parent } of iterateNode(json)) {
         node._parent_id = parent.node_id ? parent.node_id : 'root'
         node._parent = parent.node_id ? parent : { node_id: 'root', children: json, _path: [], node_type: 'chapter', node_level: this.data[0].node_level - 1, content: {level: this.data[0].node_level - 1} }
-        if (this.expandNumber === -1) {
-          node._closed = !this.expandAll
+        if (this.flattenDataMap.get(node.node_id)) {
+          node._closed = this.flattenDataMap.get(node.node_id)._closed
         } else {
-          node._closed = node.node_level > this.expandNumber
+          if (this.expandNumber === -1) {
+            node._closed = !this.expandAll
+          } else {
+            node._closed = node.node_level > this.expandNumber
+          }
         }
         node._path = parent._path ? [...parent._path, parent] : []
         if (this.showCheckbox) {
@@ -394,6 +398,7 @@ export default {
           node._checked = true
         }
         list.push(node)
+        this.flattenDataMap.set(node.node_id, node)
       }
       this.flattenJson = list
     },
@@ -790,12 +795,25 @@ export default {
     },
     dragoverHandle(e, item) {
       this.dragendNode = item;
+      const width = this.getContentWidth();
       if (e.offsetY < 10) {
         this.dragendType = 'before';
       } else {
-        this.dragendType = 'after';
+        if (item.node_type === 'chapter' && e.offsetX > width / 3) {
+          this.dragendType = 'inner';
+        } else {
+          if (this.dragstartNode[0].node_type !== 'chapter' && item.node_type === 'chapter') {
+            this.dragendType = 'inner';
+          } else {
+            this.dragendType = 'after';
+          }
+        }
       }
       e.preventDefault();
+    },
+    getContentWidth () {
+      const itemBox = document.querySelector('.item-box');
+      return itemBox.clientWidth;
     },
     dragendHandle(e) {
       if (this.dragstartNode.some(item => this.disableNodeKeys.includes(item.node_id)) || this.disableNodeKeys.includes(this.dragendNode.node_id)) return;
@@ -848,81 +866,83 @@ export default {
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === target), 0, node);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-        } else {
-          if (target.node_type === 'chapter') {
-            parent.children.splice(index, 1);
-            target.children.unshift(node);
-            const levelChangeCount = target.node_level + 1 - node.node_level;
-            // 更新原数据
-            const orgNode = this.riginalDataMap.get(node.node_id);
-            this.$set(orgNode, 'parent_id', target.node_id === 'root' ? '' : target.node_id);
-            this.$set(orgNode, 'order', 1);
-            this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
-            this.riginalDataMap.get(target.node_id).children.unshift(orgNode);
-            this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
-              if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-            })
-            this.riginalDataMap.get(target.node_id).children.forEach((item, index) => {
-              if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-            })
-            for (const { node } of iterateNode([orgNode])) {
-              const node_level = node.node_level + levelChangeCount
-              this.$set(node, 'node_level', node_level);
-              if (node.node_type === 'chapter') {
-                this.$set(node.content, 'level', node_level);
-              }
+        } else if (this.dragendType === 'inner') {
+          parent.children.splice(index, 1);
+          target.children.unshift(node);
+          const levelChangeCount = target.node_level + 1 - node.node_level;
+          // 更新原数据
+          const orgNode = this.riginalDataMap.get(node.node_id);
+          this.$set(orgNode, 'parent_id', target.node_id === 'root' ? '' : target.node_id);
+          this.$set(orgNode, 'order', 1);
+          this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
+          this.riginalDataMap.get(target.node_id).children.unshift(orgNode);
+          this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
+            if (item.order !== index + 1) this.$set(item, 'order', index + 1)
+          })
+          this.riginalDataMap.get(target.node_id).children.forEach((item, index) => {
+            if (item.order !== index + 1) this.$set(item, 'order', index + 1)
+          })
+          for (const { node } of iterateNode([orgNode])) {
+            const node_level = node.node_level + levelChangeCount
+            this.$set(node, 'node_level', node_level);
+            if (node.node_type === 'chapter') {
+              this.$set(node.content, 'level', node_level);
             }
-            // 更新目录树
-            this.$set(node, 'node_level', target.node_level + 1);
-            this.$set(node, '_path', [...target._path, target]);
-            this.$set(node, '_parent', target);
-            const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === node.node_id));
-            nodeAllChildren.forEach(children => {
-              this.$set(children, 'node_level', children.node_level + levelChangeCount);
-              this.$set(children, '_path', [...children._parent._path, children._parent]);
-            })
-            this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === node.node_id)));
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
-          } else {
-            parent.children.splice(index, 1);
-            targetParent.children.splice(targetIndex + 1, 0, node);
-            const levelChangeCount = targetParent.node_level + 1 - node.node_level;
-            // 更新原数据
-            const orgNode = this.riginalDataMap.get(node.node_id);
-            this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
-            const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
-            this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
-            const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
-            this.riginalDataMap.get(targetParent.node_id).children.splice(orgTargetIndex + 1, 0, orgNode);
-            this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
-              if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-            })
-            this.riginalDataMap.get(targetParent.node_id).children.forEach((item, index) => {
-              if (item.order !== index + 1) this.$set(item, 'order', index + 1)
-            })
-            for (const { node } of iterateNode([orgNode])) {
-              const node_level = node.node_level + levelChangeCount
-              this.$set(node, 'node_level', node_level);
-              if (node.node_type === 'chapter') {
-                this.$set(node.content, 'level', node_level);
-              }
-            }
-            // 更新目录树
-            this.$set(node, 'node_level', targetParent.node_level + 1);
-            this.$set(node, '_path', [...targetParent._path, targetParent]);
-            this.$set(node, '_parent', targetParent);
-            const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === node.node_id));
-            nodeAllChildren.forEach(children => {
-              this.$set(children, 'node_level', children.node_level + levelChangeCount);
-              this.$set(children, '_path', [...children._parent._path, children._parent]);
-            });
-            this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === node.node_id)));
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
-            this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
           }
+          // 更新目录树
+          this.$set(node, 'node_level', target.node_level + 1);
+          this.$set(node, '_path', [...target._path, target]);
+          this.$set(node, '_parent', target);
+          const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === node.node_id));
+          nodeAllChildren.forEach(children => {
+            this.$set(children, 'node_level', children.node_level + levelChangeCount);
+            this.$set(children, '_path', [...children._parent._path, children._parent]);
+          })
+          this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === node.node_id)));
+          this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
+          this.flattenJson.splice(this.flattenJson.findIndex(item => item === target) + 1, 0, node);
+          this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
+        } else {
+          parent.children.splice(index, 1);
+          targetParent.children.splice(targetIndex + 1, 0, node);
+          const levelChangeCount = targetParent.node_level + 1 - node.node_level;
+          // 更新原数据
+          const orgNode = this.riginalDataMap.get(node.node_id);
+          this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
+          const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
+          this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
+          const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
+          this.riginalDataMap.get(targetParent.node_id).children.splice(orgTargetIndex + 1, 0, orgNode);
+          this.riginalDataMap.get(parent.node_id).children.forEach((item, index) => {
+            if (item.order !== index + 1) this.$set(item, 'order', index + 1)
+          })
+          this.riginalDataMap.get(targetParent.node_id).children.forEach((item, index) => {
+            if (item.order !== index + 1) this.$set(item, 'order', index + 1)
+          })
+          for (const { node } of iterateNode([orgNode])) {
+            const node_level = node.node_level + levelChangeCount
+            this.$set(node, 'node_level', node_level);
+            if (node.node_type === 'chapter') {
+              this.$set(node.content, 'level', node_level);
+            }
+          }
+          // 更新目录树
+          this.$set(node, 'node_level', targetParent.node_level + 1);
+          this.$set(node, '_path', [...targetParent._path, targetParent]);
+          this.$set(node, '_parent', targetParent);
+          const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === node.node_id));
+          nodeAllChildren.forEach(children => {
+            this.$set(children, 'node_level', children.node_level + levelChangeCount);
+            this.$set(children, '_path', [...children._parent._path, children._parent]);
+          });
+          this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === node.node_id) || n.node_id === node.node_id));
+          const targetChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === target.node_id));
+          const targetLastIndex = this.flattenJson.findIndex(item => item === (targetChildren.length ? targetChildren[targetChildren.length - 1] : target));
+          console.log(targetChildren);
+          console.log(targetLastIndex);
+          this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
+          this.flattenJson.splice(targetLastIndex + 1, 0, node);
+          this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
         }
         this.$set(node, '_checked', false)
       }
@@ -1045,10 +1065,6 @@ export default {
     background-color: aliceblue;
     opacity: 0.8;
   }
-  .empty {
-    height: 100px;
-    color: #aaa;
-  }
   .make {
     background-color: rgb(215, 234, 210);
   }
@@ -1124,55 +1140,39 @@ export default {
 .drag {
   background-color: aliceblue;
   &-before{
-    &-chapter{
-      &:before {
-        content: '';
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        right: 0;
-        height: 2px;
-        width: 100%;
-        background-color: #66b1ff;
-      }
+    &:before {
+      content: '';
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      right: 0;
+      height: 5px;
+      width: 100%;
+      background-color: #66b1ff;
     }
-    &-question{
-      &:before {
-        content: '';
-        position: absolute;
-        left: 0px;
-        top: 0px;
-        right: 0;
-        height: 2px;
-        width: 100%;
-        background-color: #66b1ff;
-      }
+  }
+  &-inner{
+    &:after {
+      content: '';
+      position: absolute;
+      left: 30%;
+      bottom: 0px;
+      right: 0;
+      height: 5px;
+      width: 70%;
+      background-color: #66b1ff;
     }
   }
   &-after{
-    &-chapter{
-      &:after {
-        content: '';
-        position: absolute;
-        left: 20%;
-        bottom: 0px;
-        right: 0;
-        height: 2px;
-        width: 80%;
-        background-color: #66b1ff;
-      }
-    }
-    &-question{
-      &:after {
-        content: '';
-        position: absolute;
-        left: 0px;
-        bottom: 0px;
-        right: 0;
-        height: 2px;
-        width: 100%;
-        background-color: #66b1ff;
-      }
+    &:after {
+      content: '';
+      position: absolute;
+      left: 0px;
+      bottom: 0px;
+      right: 0;
+      height: 5px;
+      width: 100%;
+      background-color: #66b1ff;
     }
   }
 }
@@ -1188,5 +1188,9 @@ export default {
   cursor: default !important;
   background-color: #eee !important;
   color: #aaa !important;
+}
+.empty {
+  height: 100px;
+  color: #aaa;
 }
 </style>
