@@ -797,9 +797,13 @@ export default {
       this.dragendNode = item;
       const width = this.getContentWidth();
       if (e.offsetY < 10) {
-        this.dragendType = 'before';
+        if (this.dragstartNode[0].node_type !== 'chapter' && item.node_type === 'chapter') {
+          this.dragendType = 'inner';
+        } else {
+          this.dragendType = 'before';
+        }
       } else {
-        if (item.node_type === 'chapter' && e.offsetX > width / 3) {
+        if (item.node_type === 'chapter' && e.offsetX > width / 4) {
           this.dragendType = 'inner';
         } else {
           if (this.dragstartNode[0].node_type !== 'chapter' && item.node_type === 'chapter') {
