@@ -547,7 +547,7 @@ export default {
       this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren);
       this.currNode.children.push(newNode);
       this.$message.success('创建成功');
-      this.$emit('add-node-children', this.riginalDataMap.get(newNode.node_id));
+      this.$emit('add-node-children', this.riginalDataMap.get(newNode.node_id), this.riginalDataMap.get(this.currNode.node_id));
       this.contextMenuVisible = false;
     },
     handleAddSibling() {
@@ -599,7 +599,7 @@ export default {
       this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren);
       this.currNode._parent.children.splice(currNodeIndex + 1, 0, newNode);
       this.$message.success('创建成功');
-      this.$emit('add-node-sibling', this.riginalDataMap.get(newNode.node_id));
+      this.$emit('add-node-sibling', this.riginalDataMap.get(newNode.node_id), this.riginalDataMap.get(this.currNode.node_id));
       this.contextMenuVisible = false;
     },
     handleContentLevelAdd() {
@@ -942,26 +942,13 @@ export default {
           this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === node.node_id) || n.node_id === node.node_id));
           const targetChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === target.node_id));
           const targetLastIndex = this.flattenJson.findIndex(item => item === (targetChildren.length ? targetChildren[targetChildren.length - 1] : target));
-          console.log(targetChildren);
-          console.log(targetLastIndex);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node), 1);
           this.flattenJson.splice(targetLastIndex + 1, 0, node);
           this.flattenJson.splice(this.flattenJson.findIndex(item => item === node) + 1, 0, ...nodeAllChildren);
         }
         this.$set(node, '_checked', false)
       }
-      let pos;
-      if (this.dragendType === 'before') {
-        pos = 'before';
-      } else {
-        this.dragstartNode.reverse();
-        if (this.dragendNode.node_type === 'chapter') {
-          pos = 'inner';
-        } else {
-          pos = 'after';
-        }
-      }
-      this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), pos);
+      this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), this.dragendType);
       this.dragendNode = '';
       this.selectList = [];
       return;
