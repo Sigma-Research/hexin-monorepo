@@ -840,6 +840,7 @@ export default {
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
           this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
+          this.$set(orgNode, 'node_parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
           const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
           this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
           const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
@@ -877,6 +878,7 @@ export default {
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
           this.$set(orgNode, 'parent_id', target.node_id === 'root' ? '' : target.node_id);
+          this.$set(orgNode, 'node_parent_id', target.node_id === 'root' ? '' : target.node_id);
           this.$set(orgNode, 'order', 1);
           this.riginalDataMap.get(parent.node_id).children.splice(index, 1);
           this.riginalDataMap.get(target.node_id).children.unshift(orgNode);
@@ -913,6 +915,7 @@ export default {
           // 更新原数据
           const orgNode = this.riginalDataMap.get(node.node_id);
           this.$set(orgNode, 'parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
+          this.$set(orgNode, 'node_parent_id', targetParent.node_id === 'root' ? '' : targetParent.node_id);
           const orgIndex = this.riginalDataMap.get(parent.node_id).children.findIndex(item => item.node_id === orgNode.node_id);
           this.riginalDataMap.get(parent.node_id).children.splice(orgIndex, 1);
           const orgTargetIndex = this.riginalDataMap.get(targetParent.node_id).children.findIndex(item => item.node_id === target.node_id);
