@@ -287,7 +287,7 @@ export default {
     draggable: {
       // 是否开启拖拽
       type: Boolean,
-      default: true,
+      default: false,
     },
     dragType: {
       // 拖拽模式
@@ -523,7 +523,7 @@ export default {
       if (typeof this.data[0].parent_id === 'string') newNode.parent_id = this.currNode.node_id;
       if (typeof this.data[0].task_id === 'string') newNode.task_id = this.currNode.task_id;
       const riginalNewNode = _cloneDeep(newNode);
-      this.riginalDataMap.get(this.currNode.node_id).children.push(riginalNewNode);
+      this.riginalDataMap.get(this.currNode.node_id).children.unshift(riginalNewNode);
       if (this.riginalDataMap.get(this.currNode._parent_id)) {
         this.riginalDataMap.get(this.currNode._parent_id).children.forEach((item, index) => {
           if (item.order !== index + 1) this.$set(item, 'order', index + 1);
@@ -544,8 +544,8 @@ export default {
       const nodeAllChildren = this.flattenJson.filter(n => n._path.some(item => item.node_id === this.currNode.node_id));
       this.flattenJson = this.flattenJson.filter(n => !(n._path.some(item => item.node_id === this.currNode.node_id)));
       this.flattenJson.splice(tagetIndex + 1, 0, newNode);
-      this.flattenJson.splice(tagetIndex + 1, 0, ...nodeAllChildren);
-      this.currNode.children.push(newNode);
+      this.flattenJson.splice(tagetIndex + 2, 0, ...nodeAllChildren);
+      this.currNode.children.unshift(newNode);
       this.$message.success('创建成功');
       this.$emit('add-node-children', this.riginalDataMap.get(newNode.node_id), this.riginalDataMap.get(this.currNode.node_id));
       this.contextMenuVisible = false;
@@ -977,214 +977,219 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.scroller {
-  margin-bottom: 50px;
-  .item-style {
-    position: relative;
-    &-active{
+.hexin-tree {
+  * {
+    user-select: none;
+  }
+  .scroller {
+    margin-bottom: 50px;
+    .item-style {
+      position: relative;
+      &-active{
+        color: #409eff;
+        background-color: aliceblue;
+        opacity: 0.8;
+      }
+      .item-level {
+        margin-right: 5px;
+        background: #eee;
+        font-size: 12px;
+        .node-level {
+          min-width: 12px;
+        }
+        .content-level {
+          min-width: 12px;
+        }
+      }
+      .item-box {
+        height: 40px;
+        justify-content: space-between;
+        .item-padding {
+          box-sizing: border-box;
+          .item-inner {
+            height: 100%;
+            cursor: pointer;
+            justify-content: space-between;
+            .icon-box {
+              min-width: 14px;
+              max-width: 14px;
+              .el-icon-caret-bottom {
+                transition: all 0.2s;
+              }
+              ._closed-node {
+                transform: rotate(-90deg);
+              }
+              .no-chapter-children {
+                min-width: 5px;
+                max-width: 5px;
+                height: 5px;
+                background: rgb(204, 204, 204);
+                display: inline-block;
+                margin: 4px;
+                border-radius: 5px;
+              }
+            }
+            .content-box {
+              width: calc(100% - 16px);
+              .html-render {
+                text-overflow: -o-ellipsis-lastline;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                line-clamp: 1;
+                -webkit-box-orient: vertical;
+              }
+            }
+            .act-node {
+              color: #198cff;
+            }
+          }
+        }
+        .item-operation {
+          margin-right: 20px;
+          height: 100%;
+          min-width: 40px;
+          max-width: 40px;
+  
+          .el-link{
+            font-size: 15px;
+          }
+        }
+      }
+    }
+    .item-style:hover {
       color: #409eff;
       background-color: aliceblue;
       opacity: 0.8;
     }
-    .item-level {
-      margin-right: 5px;
-      background: #eee;
-      font-size: 12px;
-      .node-level {
-        min-width: 12px;
-      }
-      .content-level {
-        min-width: 12px;
-      }
+    .make {
+      background-color: rgb(215, 234, 210);
     }
-    .item-box {
-      height: 40px;
-      justify-content: space-between;
-      .item-padding {
-        box-sizing: border-box;
-        .item-inner {
-          height: 100%;
-          cursor: pointer;
-          justify-content: space-between;
-          .icon-box {
-            min-width: 14px;
-            max-width: 14px;
-            .el-icon-caret-bottom {
-              transition: all 0.2s;
-            }
-            ._closed-node {
-              transform: rotate(-90deg);
-            }
-            .no-chapter-children {
-              min-width: 5px;
-              max-width: 5px;
-              height: 5px;
-              background: rgb(204, 204, 204);
-              display: inline-block;
-              margin: 4px;
-              border-radius: 5px;
-            }
-          }
-          .content-box {
-            width: calc(100% - 16px);
-            .html-render {
-              text-overflow: -o-ellipsis-lastline;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              display: -webkit-box;
-              -webkit-line-clamp: 1;
-              line-clamp: 1;
-              -webkit-box-orient: vertical;
-            }
-          }
-          .act-node {
-            color: #198cff;
-          }
-        }
+    .nomake {
+      background-color: rgb(244, 247, 246);
+    }
+    .disabled {
+      pointer-events: none;
+      cursor: default;
+      opacity: 0.5;
+    }
+    .flex-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .bold {
+      font-weight: bold;
+    }
+    .html-render {
+      display: inline;
+  
+      .katex-display {
+        display: inline;
+        margin: 0;
+        text-align: initial;
       }
-      .item-operation {
-        margin-right: 20px;
-        height: 100%;
-        min-width: 40px;
-        max-width: 40px;
-
-        .el-link{
-          font-size: 15px;
-        }
+      .katex-display > .katex {
+        display: inline;
+        text-align: initial;
+        white-space: normal;
+      }
+      .katex-display > .katex > .katex-html {
+        display: inline;
+      }
+      .katex {
+        display: inline-block;
+        white-space: nowrap;
+        font-size: 1em;
       }
     }
   }
-  .item-style:hover {
-    color: #409eff;
+  .line{
+    width: 100%;
+    height: 1px;
+    background: #ccc
+  }
+  .c-node-tree-context-menu{
+    font-size: 12px;
+    position: fixed;
+    background: #fff;
+    border-radius: 3px;
+    z-index: 999;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    a {
+      width: 150px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      display: block;
+      color: #606266;
+      padding: 2px;
+      text-decoration: none;
+    }
+    a:hover{
+      background: #409EFF;
+      color: #fff;
+    }
+  }
+  .drag {
     background-color: aliceblue;
-    opacity: 0.8;
+    &-before{
+      &:before {
+        content: '';
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0;
+        height: 5px;
+        width: 100%;
+        background-color: #66b1ff;
+      }
+    }
+    &-inner{
+      &:after {
+        content: '';
+        position: absolute;
+        left: 30%;
+        bottom: 0px;
+        right: 0;
+        height: 5px;
+        width: 70%;
+        background-color: #66b1ff;
+      }
+    }
+    &-after{
+      &:after {
+        content: '';
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        right: 0;
+        height: 5px;
+        width: 100%;
+        background-color: #66b1ff;
+      }
+    }
   }
-  .make {
-    background-color: rgb(215, 234, 210);
+  .selected {
+    background-color: rgb(253,242,231) !important;
   }
-  .nomake {
-    background-color: rgb(244, 247, 246);
-  }
-  .disabled {
-    pointer-events: none;
-    cursor: default;
-    opacity: 0.5;
-  }
-  .flex-center {
+  .flex-start{
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: center;
   }
-  .text-center {
-    text-align: center;
+  .disable-node{
+    cursor: default !important;
+    background-color: #eee !important;
+    color: #aaa !important;
   }
-  .bold {
-    font-weight: bold;
+  .empty {
+    height: 100px;
+    color: #aaa;
   }
-  .html-render {
-    display: inline;
-
-    .katex-display {
-      display: inline;
-      margin: 0;
-      text-align: initial;
-    }
-    .katex-display > .katex {
-      display: inline;
-      text-align: initial;
-      white-space: normal;
-    }
-    .katex-display > .katex > .katex-html {
-      display: inline;
-    }
-    .katex {
-      display: inline-block;
-      white-space: nowrap;
-      font-size: 1em;
-    }
-  }
-}
-.line{
-  width: 100%;
-  height: 1px;
-  background: #ccc
-}
-.c-node-tree-context-menu{
-  font-size: 12px;
-  position: fixed;
-  background: #fff;
-  border-radius: 3px;
-  z-index: 999;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  a {
-    width: 150px;
-    height: 28px;
-    line-height: 28px;
-    text-align: center;
-    display: block;
-    color: #606266;
-    padding: 2px;
-    text-decoration: none;
-  }
-  a:hover{
-    background: #409EFF;
-    color: #fff;
-  }
-}
-.drag {
-  background-color: aliceblue;
-  &-before{
-    &:before {
-      content: '';
-      position: absolute;
-      left: 0px;
-      top: 0px;
-      right: 0;
-      height: 5px;
-      width: 100%;
-      background-color: #66b1ff;
-    }
-  }
-  &-inner{
-    &:after {
-      content: '';
-      position: absolute;
-      left: 30%;
-      bottom: 0px;
-      right: 0;
-      height: 5px;
-      width: 70%;
-      background-color: #66b1ff;
-    }
-  }
-  &-after{
-    &:after {
-      content: '';
-      position: absolute;
-      left: 0px;
-      bottom: 0px;
-      right: 0;
-      height: 5px;
-      width: 100%;
-      background-color: #66b1ff;
-    }
-  }
-}
-.selected {
-  background-color: rgb(253,242,231) !important;
-}
-.flex-start{
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-.disable-node{
-  cursor: default !important;
-  background-color: #eee !important;
-  color: #aaa !important;
-}
-.empty {
-  height: 100px;
-  color: #aaa;
 }
 </style>

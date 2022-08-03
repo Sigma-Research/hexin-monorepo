@@ -22,7 +22,7 @@ export const JsonTreeHandle = () => ({
 export const HxTreeHandle = () => ({
   components: { HxTree },
   data() { return { json, expandAll: true, contextMenu: ['addSon', 'addSibling', 'edit', 'addLevel', 'reduceLevel', 'deleteOne', 'deleteAll'] } },
-  template: '<HxTree :data="json" :showCheckbox="true" :expandAll="expandAll" :showNodeLevel="true" :showContentLevel="true"/>',
+  template: '<HxTree :data="json" :showCheckbox="true" :contextMenu="contextMenu" :expandAll="expandAll" :showNodeLevel="true" :showContentLevel="true"/>',
 })
 
 ChapterAnalysisHandle.story = {
