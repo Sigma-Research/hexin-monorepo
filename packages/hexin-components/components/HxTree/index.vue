@@ -339,7 +339,7 @@ export default {
       this.init()
       this.$forceUpdate()
     },
-    expandNumber() {
+    checkedKeys() {
       this.init()
       this.$forceUpdate()
     },
