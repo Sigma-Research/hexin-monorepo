@@ -951,7 +951,7 @@ export default {
         }
         this.$set(node, '_checked', false)
       }
-      this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), this.dragendType);
+      this.$emit('node-drag-end', e, this.dragstartNode.map(item => this.riginalDataMap.get(item.node_id)), this.riginalDataMap.get(this.dragendNode.node_id), this.riginalDataMap.get(this.dragendNode.node_parent_id), this.dragendType);
       this.dragendNode = '';
       this.selectList = [];
       return;
