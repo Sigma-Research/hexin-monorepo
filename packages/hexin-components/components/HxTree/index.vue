@@ -821,10 +821,11 @@ export default {
     },
     dragendHandle(e) {
       if (this.dragstartNode.some(item => this.disableNodeKeys.includes(item.node_id)) || this.disableNodeKeys.includes(this.dragendNode.node_id)) return;
-      if (this.dragendType === 'after') {
-        this.dragstartNode.reverse();
+      let dragNodes = [...this.dragstartNode];
+      if (this.dragendType === 'after' || this.dragendType === 'inner') {
+        dragNodes = dragNodes.reverse();
       }
-      for (let node of this.dragstartNode) {
+      for (let node of dragNodes) {
         const parent = node._parent.node_id ? node._parent : undefined;
         const target = this.dragendNode;
         const targetParent = this.dragendNode._parent.node_id ? this.dragendNode._parent : undefined;
