@@ -475,7 +475,7 @@ export default {
       }
     },
     handleRightTap(e, node, eventName) {
-      if (this.disableNodeKeys.includes(node.node_id) || item._parent.node_type !== 'chapter') return;
+      if (this.disableNodeKeys.includes(node.node_id) || node.node_type !== 'chapter') return;
       this.currNode = node;
       this.activeNodeId = node.node_id;
       e.returnValue = false;
