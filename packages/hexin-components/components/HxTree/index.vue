@@ -26,13 +26,13 @@
         @dragend.stop="dragendHandle($event)"
         @drop.stop="dropHandle"
         :class="{
-          'drag': !disableNodeKeys.includes(item.node_id) && dragendNode === item,
-          'drag-before': !disableNodeKeys.includes(item.node_id) && dragendNode === item && dragendType === 'before',
-          'drag-after': !disableNodeKeys.includes(item.node_id) && dragendNode === item && dragendType === 'after',
-          'drag-inner': !disableNodeKeys.includes(item.node_id) && dragendNode === item && item.node_type === 'chapter' && dragendType === 'inner',
+          'drag': !disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter' && dragendNode === item,
+          'drag-before': !disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter' && dragendNode === item && dragendType === 'before',
+          'drag-after': !disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter' && dragendNode === item && dragendType === 'after',
+          'drag-inner': !disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter' && dragendNode === item && item.node_type === 'chapter' && dragendType === 'inner',
           'selected': selectList.includes(item),
           'item-style-active': activeNodeId === item.node_id,
-          'disable-node': disableNodeKeys.includes(item.node_id)
+          'disable-node': disableNodeKeys.includes(item.node_id) || item._parent.node_type !== 'chapter'
         }"
       >
         <div
@@ -118,7 +118,7 @@
           >
             <!-- <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-top" @click="move(item, 'up')"/>
             <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-bottom" @click="move(item, 'down')"/> -->
-            <el-link v-if="!disableNodeKeys.includes(item.node_id)" type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
+            <el-link v-if="!disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter'" type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
             <el-link v-else disabled type="info" :underline="false" icon="el-icon-lock"/>
           </div>
         </div>
@@ -475,7 +475,7 @@ export default {
       }
     },
     handleRightTap(e, node, eventName) {
-      if (this.disableNodeKeys.includes(node.node_id)) return;
+      if (this.disableNodeKeys.includes(node.node_id) || item._parent.node_type !== 'chapter') return;
       this.currNode = node;
       this.activeNodeId = node.node_id;
       e.returnValue = false;
