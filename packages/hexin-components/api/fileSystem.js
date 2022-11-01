@@ -3,6 +3,12 @@ const api = axios.create({
   // timeout: 4000000,
 })
 
+api.interceptors.response.use(res => {
+  return new Promise(resolve => {
+    resolve(res.data.data)
+  })
+})
+
 const getWorkSheetUrl = url => {
   // const isInstra =
   //   location.origin.indexOf('hexin.im') > 0 ||
