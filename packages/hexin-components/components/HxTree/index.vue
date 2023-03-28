@@ -130,7 +130,7 @@
       :show="contextMenuVisible"
       @update:show="(show) => (contextMenuVisible = show)"
     >
-      <template v-if="!disableNodeKeys.includes(item.node_id)">
+      <template v-if="!disableNodeKeys.includes(activeNodeId)">
         <a v-if="contextMenu.includes('addSon')" href="javascript:;" @click="handleAddChildren">增加子标题</a>
         <a v-if="contextMenu.includes('addSibling')" href="javascript:;" @click="handleAddSibling">增加平级标题</a>
         <div v-if="contextMenu.includes('addSon') || contextMenu.includes('addSibling')" class="line"></div>
