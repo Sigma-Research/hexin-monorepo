@@ -118,7 +118,7 @@
           >
             <!-- <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-top" @click="move(item, 'up')"/>
             <el-link type="primary" class="m-r-5" :underline="false" icon="el-icon-bottom" @click="move(item, 'down')"/> -->
-            <el-link v-if="!disableNodeKeys.includes(item.node_id) && item._parent.node_type === 'chapter'" type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
+            <el-link v-if="!(disableNodeKeys.includes(item.node_id) && !disableNodeContextMenu.length) && item._parent.node_type === 'chapter'" type="primary" :underline="false" icon="el-icon-more" @click="handleRightTap($event, item, 'click')"/>
             <el-link v-else disabled type="info" :underline="false" icon="el-icon-lock"/>
           </div>
         </div>
@@ -130,20 +130,38 @@
       :show="contextMenuVisible"
       @update:show="(show) => (contextMenuVisible = show)"
     >
-      <a v-if="contextMenu.includes('addSon')" href="javascript:;" @click="handleAddChildren">增加子标题</a>
-      <a v-if="contextMenu.includes('addSibling')" href="javascript:;" @click="handleAddSibling">增加平级标题</a>
-      <div v-if="contextMenu.includes('addSon') || contextMenu.includes('addSibling')" class="line"></div>
-      <a v-if="contextMenu.includes('edit')" href="javascript:;" @click="handleEdit">编辑</a>
-      <div v-if="contextMenu.includes('edit')" class="line"></div>
-      <a v-if="contextMenu.includes('quitExport')" href="javascript:;" @click="handleQuitExport">快速导入</a>
-      <a v-if="contextMenu.includes('styleExport')" href="javascript:;" @click="handleStyleExport">从体例导入</a>
-      <div v-if="contextMenu.includes('quitExport') || contextMenu.includes('styleExport')" class="line"></div>
-      <a v-if="contextMenu.includes('addLevel')" href="javascript:;" @click="handleContentLevelAdd">升级</a>
-      <a v-if="contextMenu.includes('reduceLevel')" href="javascript:;" @click="handleContentLevelReduce">降级</a>
-      <div v-if="contextMenu.includes('addLevel') || contextMenu.includes('reduceLevel')" class="line"></div>
-      <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
-      <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
-      <a v-if="contextMenu.includes('delete')" href="javascript:;" @click="handleDelete()">删除</a>
+      <template v-if="!disableNodeKeys.includes(item.node_id)">
+        <a v-if="contextMenu.includes('addSon')" href="javascript:;" @click="handleAddChildren">增加子标题</a>
+        <a v-if="contextMenu.includes('addSibling')" href="javascript:;" @click="handleAddSibling">增加平级标题</a>
+        <div v-if="contextMenu.includes('addSon') || contextMenu.includes('addSibling')" class="line"></div>
+        <a v-if="contextMenu.includes('edit')" href="javascript:;" @click="handleEdit">编辑</a>
+        <div v-if="contextMenu.includes('edit')" class="line"></div>
+        <a v-if="contextMenu.includes('quitExport')" href="javascript:;" @click="handleQuitExport">快速导入</a>
+        <a v-if="contextMenu.includes('styleExport')" href="javascript:;" @click="handleStyleExport">从体例导入</a>
+        <div v-if="contextMenu.includes('quitExport') || contextMenu.includes('styleExport')" class="line"></div>
+        <a v-if="contextMenu.includes('addLevel')" href="javascript:;" @click="handleContentLevelAdd">升级</a>
+        <a v-if="contextMenu.includes('reduceLevel')" href="javascript:;" @click="handleContentLevelReduce">降级</a>
+        <div v-if="contextMenu.includes('addLevel') || contextMenu.includes('reduceLevel')" class="line"></div>
+        <a v-if="contextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
+        <a v-if="contextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
+        <a v-if="contextMenu.includes('delete')" href="javascript:;" @click="handleDelete()">删除</a>
+      </template>
+      <template v-else>
+        <a v-if="disableNodeContextMenu.includes('addSon')" href="javascript:;" @click="handleAddChildren">增加子标题</a>
+        <a v-if="disableNodeContextMenu.includes('addSibling')" href="javascript:;" @click="handleAddSibling">增加平级标题</a>
+        <div v-if="disableNodeContextMenu.includes('addSon') || disableNodeContextMenu.includes('addSibling')" class="line"></div>
+        <a v-if="disableNodeContextMenu.includes('edit')" href="javascript:;" @click="handleEdit">编辑</a>
+        <div v-if="disableNodeContextMenu.includes('edit')" class="line"></div>
+        <a v-if="disableNodeContextMenu.includes('quitExport')" href="javascript:;" @click="handleQuitExport">快速导入</a>
+        <a v-if="disableNodeContextMenu.includes('styleExport')" href="javascript:;" @click="handleStyleExport">从体例导入</a>
+        <div v-if="disableNodeContextMenu.includes('quitExport') || disableNodeContextMenu.includes('styleExport')" class="line"></div>
+        <a v-if="disableNodeContextMenu.includes('addLevel')" href="javascript:;" @click="handleContentLevelAdd">升级</a>
+        <a v-if="disableNodeContextMenu.includes('reduceLevel')" href="javascript:;" @click="handleContentLevelReduce">降级</a>
+        <div v-if="disableNodeContextMenu.includes('addLevel') || disableNodeContextMenu.includes('reduceLevel')" class="line"></div>
+        <a v-if="disableNodeContextMenu.includes('deleteOne')" href="javascript:;" @click="handleDelete('one')">删除（仅该标题）</a>
+        <a v-if="disableNodeContextMenu.includes('deleteAll')" href="javascript:;" @click="handleDelete('children')">删除（含子内容）</a>
+        <a v-if="disableNodeContextMenu.includes('delete')" href="javascript:;" @click="handleDelete()">删除</a>
+      </template>
     </VueContextMenu>
     <el-dialog width="500px" title="标题编辑" :visible="renameDialogVisible">
       <el-input v-model="rename" autocomplete="off" class="m-v-20"/>
@@ -281,6 +299,11 @@ export default {
     },
     contextMenu: {
       // 右键操作功能列表
+      type: Array,
+      default: () => { return [] },
+    },
+    disableNodeContextMenu: {
+      // 禁用节点右键操作功能列表
       type: Array,
       default: () => { return [] },
     },
@@ -475,7 +498,7 @@ export default {
       }
     },
     handleRightTap(e, node, eventName) {
-      if (this.disableNodeKeys.includes(node.node_id) || node.node_type !== 'chapter') return;
+      if ((this.disableNodeKeys.includes(node.node_id) && !this.disableNodeContextMenu.length) || node.node_type !== 'chapter') return;
       this.currNode = node;
       this.activeNodeId = node.node_id;
       e.returnValue = false;
