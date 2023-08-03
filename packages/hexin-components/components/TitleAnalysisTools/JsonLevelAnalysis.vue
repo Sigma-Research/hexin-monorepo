@@ -272,13 +272,14 @@ export default {
     },
     renderHtmlLatex (html, opt = {}) {
       if (html) {
-        const newHtml = html.replace(/\$\$([\s\S]*?)\$\$/g, (_m, latex) => {
+        let newHtml = html.replace(/\$\$([\s\S]*?)\$\$/g, (_m, latex) => {
           if (latex) {
             const mathHtml = this.renderLatex(latex, opt);
             return mathHtml;
           }
           return _m;
         });
+        newHtml = `<span>${newHtml}</span>`
         return newHtml;
       }
       return html;
