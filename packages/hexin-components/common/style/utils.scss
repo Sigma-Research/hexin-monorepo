@@ -1,0 +1,379 @@
+.clearfix {
+  &:after {
+    content: "";
+    clear: both;
+    display: table;
+    visibility: hidden;
+    zoom: 1;
+  }
+}
+.m-b-0{
+  margin-bottom: 0;
+}
+.m-t-0{
+  margin-top: 0;
+}
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.c-p {
+  cursor: pointer;
+}
+
+.relative {
+  position: relative;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.no-bold {
+  font-weight: normal;
+}
+
+.no-drag {
+  user-drag: none;
+  -webkit-user-drag: none;
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+.no-select {
+  user-select: none;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+// 左 auto
+.m-l-a {
+  margin-left: auto;
+}
+
+// 右 auto
+.m-r-a {
+  margin-right: auto;
+}
+
+.flex {
+  display: flex;
+}
+.flex-none {
+  flex: none;
+}
+
+.flex-wrap{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-start{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.flex-shrink {
+  flex-shrink: 0;
+}
+
+.underline {
+  text-decoration: underline
+}
+
+@for $var from 1 to 5 {
+  .flex-#{$var} {
+    flex: $var
+  }
+}
+
+.a-center {
+  align-items: center;
+}
+
+.a-end {
+  align-items:flex-end
+}
+
+.j-center {
+  justify-content: center;
+}
+
+.j-between {
+  justify-content: space-between;
+}
+
+.j-around {
+  justify-content: space-around;
+}
+
+.bg-white {
+  background: #fff;
+}
+
+.bg-grey {
+  background: rgba(203, 209, 218, 0.1);
+}
+
+.bg-soft{
+  background-color: $bg_soft;
+}
+
+.o-hidden {
+  overflow: hidden;
+}
+
+.o-auto {
+  overflow: auto;
+}
+
+.o-scroll {
+  overflow: scroll;
+}
+
+.o-scroll-y {
+  overflow-y: scroll;
+}
+
+.match {
+  color: #f2a200;
+}
+table {
+  border-spacing: 0;
+}
+.z-9999 {
+  z-index: 9999 !important;
+}
+span {
+  &[data-label="blank"] {
+    border-bottom: 2px solid currentColor;
+  }
+
+  &[data-label="bracket"] {
+    &::before {
+      content: '('
+    }
+    &::after {
+      content: ')'
+    }
+  }
+
+  &[data-label="emphasis_wave"] {
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+  }
+
+  &[data-label="emphasis_double"] {
+    text-decoration-line: underline;
+    text-decoration-style: double;
+  }
+
+  &[data-label="emphasis_dot"] {
+    text-emphasis-style: dot;
+    text-emphasis-position: under left;
+  }
+}
+@each $val in left, center, right {
+  .text-#{$val} {
+    text-align: $val;
+  }
+}
+
+@each $f in 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 {
+  .fs-#{$f} {
+    font-size: $f + 0px;
+  }
+}
+
+// --tools--
+@font-face {
+  font-family: shuban_gbks;
+  src: url('/static/font/Gbk_s.ttf');
+}
+@font-face {
+  font-family: shuban_ckt;
+  src: url('/static/font/PCC-KT.TTF');
+}
+.char-shuban{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana,'shuban_gbks','shuban_ckt', sans-serif;
+}
+.b{
+  font-weight: bold;
+}
+.u{
+  text-decoration: underline;
+}
+.usn{
+  user-select: none;
+}
+.tac{
+  text-align: center;
+}
+.tal{
+  text-align: left;
+}
+.tar{
+  text-align: right;
+}
+.ofh{
+  overflow: hidden;
+}
+.ofa{
+  overflow: auto;
+}
+.radius-5{
+  border-radius: 5px;
+}
+.shadowed{
+  box-shadow: 0 0 8px rgba(0,0,0,0.13);
+}
+.rel{
+ position: relative; 
+}
+.zindex9{
+  z-index: 9;
+}
+.zindex10{
+  z-index: 10;
+}
+.zindex20{
+  z-index: 20;
+}
+.cd{
+  cursor: default;
+}
+.cp{
+  cursor: pointer;
+  user-select: none;
+}
+.no-underline{
+  text-decoration: none;
+}
+.c{
+  color: $c;
+}
+.hover-c{
+  &:hover{
+    color: $c;
+  }
+}
+.bg-c{
+  background-color: $c;
+}
+.bg-c-focus{
+  background-color: $c_focus;
+}
+.text-small,.t-small{
+  font-size: 12px;
+}
+.text-link,.t-link{
+  color: $c;
+  cursor: pointer;
+  &:hover{
+    color: $c_focus;
+  }
+}
+.text-gray,.t-gray{
+  color: #999;
+}
+.s{
+  text-decoration: line-through;
+}
+
+// 生成常用的margin, padding 使用：m-r-数值
+@mixin mp($num) {
+  $mpMap: (m: margin, p: padding);
+  $dMap: (t: top, r: right, b: bottom, l: left, v: '', h: '', a: '');
+  @each $key, $val in $mpMap {
+    @each $dKey, $dVal in $dMap {
+      .#{$key}-#{$dKey}-#{$num} {
+        $px: $num + 0px;
+        @if $dKey == 'v' {
+          #{$val}-top: $px;
+          #{$val}-bottom: $px
+        } @else if $dKey == 'h' {
+          #{$val}-left: $px;
+          #{$val}-right: $px;
+        } @else if $dKey == 'a' {
+          #{$val}: $px
+        } @else {
+          #{$val}-#{$dVal}: $px
+        }
+      }
+    }
+  }
+}
+@for $i from 1 through 9999 {
+  @if $i < 10 {
+    @include mp($i)
+  }
+  @include mp($i * 5)
+}
+
+// 文字溢出处理
+@mixin textOverflow ($num) {
+  @if $num == 1 {
+    .text-overflow {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  } @else {
+    .text-overflow-#{$num} {
+      display: -webkit-box;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      -webkit-line-clamp: $num;
+      -webkit-box-orient: vertical;
+    }
+  }
+}
+
+@for $i from 1 through 3 {
+  @include textOverflow($i)
+}
+
+@each $val in left, center, right {
+  .align-#{$val} {
+    text-align: $val;
+  }
+}
+
+.empty-box {
+  width: 100%;
+  height: 100px;
+  color: #aaa;
+}
+
+.component-disabled{
+  pointer-events:none;
+  user-select:none;
+  background-color: #fefefe;
+  opacity: 0.6;
+}

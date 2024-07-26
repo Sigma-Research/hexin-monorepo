@@ -1,0 +1,41 @@
+// 说明
+// $c 开头的为一系列主色
+// $bg 开头的是一些背景专用色
+
+// 主色
+// 注意：在外部引用的那个 bootstrap 的样式，需要单独复制这个主色过去（然后 less 生成静态 css）
+$c: #48638f;
+
+// 焦点色
+$c_focus:  #4A83CE; //#198cff;
+
+$c_warning: #f2a200;
+$c_danger: #f22f18;
+$c_success: #08a7a1;
+$c_border: #eee;
+
+// element 主题色
+$el_primary: #409EFF;
+$el_primary_plan: #ecf5ff;
+$el_success: #67C23A;
+$el_warning: #E6A23C;
+$el_danger: #F56C6C;
+$el_info: #909399;
+
+// 文字颜色
+$el_text_main: #303133;
+$el_text_normal: #606266;
+$el_text_secondary: #909399;
+$el_placeholder: #C0C4CC;
+
+// 背景色
+$bg_soft: #f8f8f8;
+
+// 重要：全局高度，尽量别改
+$h_header: 56px; // header 条
+$h_bread: 35px; // 面包屑
+
+$font-family: "Microsoft YaHei", SimHei, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Heiti SC", "ST Heiti", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei", "WenQuanYi Zen Hei Sharp", sans-serif;
+$font-size: 14px;
+$color-background: #fff;
+$color-normal: #333;

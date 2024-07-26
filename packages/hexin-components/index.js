@@ -2,6 +2,9 @@
 import JsonLevelAnalysis from './components/TitleAnalysisTools/JsonLevelAnalysis.vue'
 // import JsonTree from './components/JsonTree/index.vue'
 import HxTree from './components/HxTree/index.vue'
+import './common/style/jb.scss'
+import './common/style/utils.scss'
+
 
 const components = {
   // TitleAnalysis,

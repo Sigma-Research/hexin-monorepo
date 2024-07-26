@@ -4,8 +4,11 @@ import HxTree from '../components/HxTree/index.vue';
 import '../plugins/element';
 import json from './json.json';
 import CommonList from '../components/CommonList/index.vue'
+import CommonNode from '../components/CommonList/CommonNode.vue'
+import { flattenJson } from '../common/utils/tree'
 
 export default {
+  components: { CommonNode },
   title: 'hexin',
 }
 
@@ -15,23 +18,28 @@ export const ChapterAnalysisHandle = () => ({
 })
 
 export const CommonListHandle = () => ({
-  components: { CommonList },
-  data() { return { json, expandAll: true } },
-  methods: {
-    flatJson(json) {
-      const result = [];
-      // 递归把 children 字段打平
-      function flat(node) {
-        result.push(node);
-        if (node.children) {
-          node.children.forEach(child => flat(child));
-        }
-      }
-      flat(json);
-      return result;
-    },
+  components: { CommonList, CommonNode },
+  data() { return { json: flattenJson(json), expandAll: true } },
+  watch: {
   },
-  template: `<CommonList :nodes="flatJson(json)"/>`,
+  methods: {
+  },
+  template: `
+    <CommonList :nodes="json" :mode="json.length ? 'render-all' :'virtual-list'">
+      <template v-slot="{ item, index }">
+        <div class="flex">
+          <div
+            style="width: 10px; height: inherit; margin-right: 10px;"
+          />
+          <div class="flex-1 edit-item">
+            <div>
+              <CommonNode :item="item" />
+            </div>
+          </div>
+        </div>
+      </template>
+    </CommonList>
+  `,
 })
 
 export const JsonTreeHandle = () => ({
