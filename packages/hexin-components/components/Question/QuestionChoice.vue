@@ -28,7 +28,7 @@
 
 <script>
 import Vue from 'vue';
-import { parser } from '../../common/utils'
+import { parser , tiff2Jpg} from '../../common/utils';
 import QuestionBase from './QuestionBase';
 import QuestionChoiceItem from './QuestionChoiceItem';
 import QuestionHTML from './QuestionHTML.vue';
@@ -91,7 +91,7 @@ export default {
         return;
       }
       this.$nextTick(() => {
-        const containerW = this.$refs.choice?.clientWidth;
+        const containerW = this.$refs.choice && this.$refs.choice.clientWidth;
         const id =
           'choice' + new Date().getTime() + parseInt(Math.random() * 100);
         const div = document.createElement('div');

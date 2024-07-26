@@ -38,7 +38,7 @@ const renderTian = (dom, data) => {
     cellSize += unit;
   }
   const halfSize = parseFloat(cellSize) / 2 - 0.264583 + unit;
-  const pinyin = data.pinyin?.trim().split(/,/);
+  const pinyin = data.pinyin ? data.pinyin.trim().split(/,/) : undefined;
   const lineType = data.innerLineType || 'dashed';
   for (let i = 0; i < data.length; i++) {
     const ruby = document.createElement('ruby');
@@ -72,7 +72,9 @@ const renderTian = (dom, data) => {
     rt.style.textAlign = 'center';
     rt.style.fontSize = fontSize;
     rt.style.boxSizing = 'border-box';
-    if (pinyin?.[i]) rt.innerText = pinyin[i];
+    if (pinyin && pinyin[i]) {
+      rt.innerText = pinyin[i];
+    }
     ruby.appendChild(rt);
     container.appendChild(ruby);
   }
@@ -184,7 +186,7 @@ const parser = str => {
     .querySelectorAll(
       '[data-label="fang"], [data-label="tian"], [data-label="pinyin"]'
     )
-    .forEach((node: any) => {
+    .forEach((node) => {
       if (node.dataset.label === 'fang') {
         renderFang(node, {
           width: node.dataset.width,

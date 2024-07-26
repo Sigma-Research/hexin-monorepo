@@ -58,8 +58,8 @@ export default {
         // @tips：监听到制图状态改变，则应该刷一下节点 dom。
         if (!n && !o) return;
         if (!this.item) return;
-        const $element = this.$refs[`node#${this.item.node_id}`]?.$el;
-        const $imgs = [...($element?.querySelectorAll('img') ?? [])];
+        const $element = this.$refs[`node#${this.item.node_id}`] && this.$refs[`node#${this.item.node_id}`].$el;
+        const $imgs = ($element ? [...$element.querySelectorAll('img')] : []);
         const uids = $imgs
           .map(img => img.getAttribute('data-image-uid'))
           .filter(uid => uid);
@@ -67,12 +67,18 @@ export default {
         // - 新的和旧的不一样
         // - 旧的还没有加载出来，新的加载出来
         // - 有状态、但是没有对应的 dom 节点
-        const needToUpdateUids = uids.filter(
-          uid =>
-            o?.[uid] !== n?.[uid] ||
-            (!o?.[uid] && n?.[uid]) ||
-            (n?.[uid] && !$element.querySelector('.make-image'))
-        );
+        const needToUpdateUids = uids.filter(uid => {
+          const oldUidValue = o && o[uid];
+          const newUidValue = n && n[uid];
+          const hasImageElement = $element.querySelector('.make-image');
+
+          return (
+            oldUidValue !== newUidValue ||
+            (!oldUidValue && newUidValue) ||
+            (newUidValue && !hasImageElement)
+          );
+        });
+
         if (!needToUpdateUids.length) return;
         this.updateImageStatus(needToUpdateUids);
       },
@@ -84,18 +90,17 @@ export default {
     // 创建 ResizeObserver 实例
     const resizeObserver = new ResizeObserver(async () => {
       // 执行相应的处理逻辑
-      const $imgs = [
-        ...(this.$refs[`node#${this.item.node_id}`]?.$el?.querySelectorAll(
-          'img'
-        ) ?? []),
-      ];
+      const nodeRef = this.$refs[`node#${this.item.node_id}`];
+      const nodeElement = nodeRef ? nodeRef.$el : null;
+      const $imgs = nodeElement ? [...nodeElement.querySelectorAll('img')] : [];
+
       await Promise.all($imgs.map($img => load$img($img)));
       if (!$imgs.some($img => $img.offsetHeight <= 0)) {
         this.handleImagesAligin();
         // @todo：建议使用 this.$refs[`node#${this.item.node_id}`]?.$el?.offsetHeight，有些细微的差异、应该抹平掉。
-        const height =
-          document.querySelector(`[data-item-id="${this.item.node_id}"]`)
-            ?.offsetHeight ?? 0;
+        const element = document.querySelector(`[data-item-id="${this.item.node_id}"]`);
+        const height = element ? element.offsetHeight : 0;
+
         this.$set(this.item, 'size', height);
         this.$emit('load', this.item);
         this.loading = false;
@@ -103,8 +108,8 @@ export default {
       }
     });
     // 开始监听元素的大小变化
-    console.log(this.item)
-    if (this.$refs[`node#${this.item.node_id}`]?.$el) {
+    const nodeRef = this.$refs[`node#${this.item.node_id}`];
+    if (nodeRef && nodeRef.$el) {
       resizeObserver.observe(this.$refs[`node#${this.item.node_id}`].$el);
     }
     // 在组件销毁时停止监听，防止内存泄漏
@@ -115,11 +120,10 @@ export default {
       this.$emit('dblclick', item);
     },
     initImageStatus() {
-      const $imgs = [
-        ...(this.$refs[`node#${this.item.node_id}`]?.$el?.querySelectorAll(
-          'img'
-        ) ?? []),
-      ];
+      const nodeRef = this.$refs[`node#${this.item.node_id}`];
+      const nodeElement = nodeRef && nodeRef.$el;
+      const $imgs = nodeElement ? [...nodeElement.querySelectorAll('img')] : [];
+
       const uids = $imgs
         .map(img => img.getAttribute('data-image-uid'))
         .filter(uid => uid);
@@ -128,9 +132,9 @@ export default {
     },
     updateImageStatus(uids) {
       if (!this.imgStatusMap) return;
-      const $element = this.$refs[`node#${this.item.node_id}`]?.$el;
+      const $element = this.$refs[`node#${this.item.node_id}`] && this.$refs[`node#${this.item.node_id}`].$el;
       uids.forEach(uid => {
-        const status = this.imgStatusMap?.[uid];
+        const status = this.imgStatusMap && this.imgStatusMap[uid];
         if (status === undefined) {
           return;
         }

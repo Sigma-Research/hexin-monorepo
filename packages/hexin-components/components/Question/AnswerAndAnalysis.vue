@@ -40,14 +40,12 @@ export default {
             '$1<span style="color: #409EFF !important">【解析】</span>'
           )
         : `<span style="color: #409EFF !important">【解析】</span>${analysis}`;
-      return this.data?.$$pinyin?.$$analysis
-        ? '<div class="analysis">' +
-            highlight(
-              parser(tiff2Jpg(analysis)),
-              this.data.$$pinyin.$$analysis
-            ) +
-            '</div>'
-        : '<div class="analysis">' + parser(tiff2Jpg(analysis)) + '</div>';
+      let analysisContent = parser(tiff2Jpg(analysis));
+      if (this.data && this.data.$$pinyin && this.data.$$pinyin.$$analysis) {
+        analysisContent = highlight(analysisContent, this.data.$$pinyin.$$analysis);
+      }
+      return '<div class="analysis">' + analysisContent + '</div>';
+
     },
     answer() {
       const { question_type } = this.data;
@@ -179,11 +177,12 @@ export default {
             )
           : `<span style="color: #409EFF !important">【${title}】</span>${extra}`;
       }
-      return this.data?.$$pinyin?.$$extra
-        ? '<div class="answer">' +
-            highlight(parser(tiff2Jpg(extra)), this.data.$$pinyin.$$extra) +
-            '</div>'
-        : '<div class="answer">' + parser(tiff2Jpg(extra)) + '</div>';
+      let answerContent = parser(tiff2Jpg(extra));
+      if (this.data && this.data.$$pinyin && this.data.$$pinyin.$$extra) {
+        answerContent = highlight(answerContent, this.data.$$pinyin.$$extra);
+      }
+      return '<div class="answer">' + answerContent + '</div>';
+
     },
   },
 };

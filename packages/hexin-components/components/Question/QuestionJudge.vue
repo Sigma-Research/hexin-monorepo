@@ -5,7 +5,7 @@
 
 <script>
 import QuestionBase from './QuestionBase';
-import QuestionAnswer from './QuestionAnswer.vue';
+import QuestionAnswer from './QuestionAnswer';
 export default {
   components: { QuestionAnswer, QuestionBase },
   props: {

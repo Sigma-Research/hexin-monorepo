@@ -131,14 +131,13 @@ export default {
           `${serial_number}`;
       }
       if (source) {
-        source =
-          '<span> [</span>' +
-          ($$pinyin && $$pinyin?.$$source
-            ? highlight(parser(tiff2Jpg(source || '')), $$pinyin.$$source)
-            : (source || '').replace(/\(（+(.*?)\)）+/g, '$1')) +
-          '<span>] </span>';
+        let sourceContent = (source || '').replace(/\(（+(.*?)\)）+/g, '$1');
+        if ($$pinyin && $$pinyin.$$source) {
+          sourceContent = highlight(parser(tiff2Jpg(source || '')), $$pinyin.$$source);
+        }
+        source = '<span> [</span>' + sourceContent + '<span>] </span>';
       }
-      body = $$pinyin?.body
+      body = ($$pinyin && $$pinyin.body)
         ? highlight(parser(tiff2Jpg(body)), $$pinyin.$$body)
         : parser(tiff2Jpg(body));
       body = /^<p.*?>/.test(body)
@@ -192,7 +191,8 @@ export default {
     },
     initChoiceOptions() {
       this.$nextTick(() => {
-        const containerW = this.$refs.choice?.clientWidth;
+        const containerRef = this.$refs.choice;
+        const containerW = containerRef ? containerRef.clientWidth : undefined;
         const id =
           'choice' + new Date().getTime() + parseInt(Math.random() * 100);
         const div = document.createElement('div');

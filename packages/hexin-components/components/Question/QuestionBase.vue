@@ -16,7 +16,7 @@
 <script>
 import NoAndBody from './NoAndBody';
 import AnswerAndAnalysis from './AnswerAndAnalysis';
-import { parser } from '../../common/utils'
+import { parser , tiff2Jpg} from '../../common/utils';
 export default {
   name: 'QuestionBase',
   components: { NoAndBody, AnswerAndAnalysis },

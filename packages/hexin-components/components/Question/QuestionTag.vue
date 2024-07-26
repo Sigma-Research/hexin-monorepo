@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { parser } from '../../common/utils'
+import { parser , tiff2Jpg} from '../../common/utils';
 export default {
   name: 'QuestionTag',
   props: {
