@@ -21,6 +21,10 @@ export default {
      * 3.重新设置宽高
      */
     const initImage = async () => {
+      // 如果src内没有进行resize，直接return
+      if (!/\/resize,(p|w)_(\d+)/.test(this.src)) {
+        return;
+      }
       const imgSize = await this.getImageSize(this.src);
       if (imgSize) {
         const reg = /\/resize,(p|w)_(\d+)/;
